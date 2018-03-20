@@ -1,0 +1,27 @@
+{
+  "name": "purescript-hareactive",
+  "version": "0.0.1",
+  "description": "PureScript bindings for Hareactive",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "pulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/funkia/purescript-hareactive.git"
+  },
+  "keywords": [
+    "hareactive",
+    "frp",
+    "purescript"
+  ],
+  "author": "Funkia",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/funkia/purescript-hareactive/issues"
+  },
+  "homepage": "https://github.com/funkia/purescript-hareactive#readme"
+}
