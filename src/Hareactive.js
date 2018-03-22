@@ -1,40 +1,29 @@
 const H = require("@funkia/hareactive");
-const Maybe = require("Data.Maybe");
 
-function uncurry2(f) {
-  return function (a, b) {
-    return f(a)(b);
-  };
-}
-
-function curry2(f) {
-  return function (a) {
-    return function (b) {
-      return f(a, b);
-    };
-  };
-}
-
-function curry3(f) {
-  return function (a) {
-    return function (b) {
-      return function (c) {
-        return f(a, b, c);
-      };
-    };
-  };
-}
-
-exports._mapStream = curry2(function (f, s) {
+exports._mapStream = function _map(f, s) {
   return s.map(f);
-});
+}
 
-exports._mapBehavior = curry2(function (f, b) {
-  return s.map(b);
-});
+exports._mapBehavior = exports._mapStream;
 
-exports.filter = curry2(H.filter);
+exports._filter = H.filter;
 
-exports.keepWhen = curry2(H.keepWhen);
+exports._combine = H.combine;
 
-exports.on
+exports._keepWhen = H.keepWhen;
+
+exports._scan = H.scan;
+
+exports.sample = H.sample
+
+exports._mapNow = exports._mapStream;
+
+exports._applyNow = function(nf, na) {
+  return na.ap(nf);
+}
+
+exports._pureNow = H.Now.of;
+
+exports._bindNow = function(m, f) {
+  return m.chain(f);
+}

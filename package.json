@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/funkia/purescript-hareactive/issues"
   },
-  "homepage": "https://github.com/funkia/purescript-hareactive#readme"
+  "homepage": "https://github.com/funkia/purescript-hareactive#readme",
+  "dependencies": {
+    "@funkia/hareactive": "^0.1.3"
+  }
 }
