@@ -50,6 +50,24 @@ foreign import _mapBehavior :: forall a b. Fn2 (a -> b) (Behavior a) (Behavior b
 instance functorBehavior :: Functor Behavior where
   map = runFn2 _mapBehavior
 
+instance applyBehavior :: Apply Behavior where
+  apply = runFn2 _applyBehavior
+
+foreign import _applyBehavior :: forall a b. Fn2 (Behavior (a -> b)) (Behavior a) (Behavior b)
+
+instance applicativeBehavior :: Applicative Behavior where
+  pure = _pureBehavior
+
+foreign import _pureBehavior :: forall a. a -> Behavior a
+
+instance bindBehavior :: Bind Behavior where
+  bind = runFn2 _bindBehavior
+
+foreign import _bindBehavior :: forall a b. Fn2 (Behavior a) (a -> Behavior b) (Behavior b)
+
+instance monadBehavior :: Monad Behavior
+
+
 --------------------------------------------------------------------------------
 -- Behavior and stream ---------------------------------------------------------
 --------------------------------------------------------------------------------
