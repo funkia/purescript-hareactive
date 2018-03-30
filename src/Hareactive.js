@@ -8,6 +8,8 @@ function bind(mf, f) {
   return mf.chain(f);
 }
 
+exports._memptyStream = H.empty;
+
 exports._mapStream = function _map(f, s) {
   return s.map(f);
 }

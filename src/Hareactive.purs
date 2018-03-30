@@ -10,6 +10,7 @@ module Data.Hareactive
   ) where
 
 import Prelude (class Semigroup, class Functor, (<<<), class Apply, class Applicative, class Bind, class Monad)
+import Data.Monoid (class Monoid)
 import Control.Monad.Eff (kind Effect)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2, runFn2, runFn3)
 
@@ -31,6 +32,11 @@ instance semigroupStream :: Semigroup (Stream a) where
   append = runFn2 _combine
 
 foreign import _combine :: forall a. Fn2 (Stream a) (Stream a) (Stream a)
+
+instance monoidStream :: Monoid (Stream a) where
+  mempty = _memptyStream
+
+foreign import _memptyStream :: forall a. Stream a
 
 -- | Filter a stream, keeping the elements which satisfy a predicate function,
 -- | creating a new stream.
