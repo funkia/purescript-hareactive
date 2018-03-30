@@ -5,7 +5,7 @@ function apply(f, a) {
 }
 
 function bind(mf, f) {
-  return m.chain(f);
+  return mf.chain(f);
 }
 
 exports._mapStream = function _map(f, s) {
@@ -27,6 +27,8 @@ exports._combine = H.combine;
 exports._keepWhen = H.keepWhen;
 
 exports._scan = H.scan;
+
+exports._scanS = H.scanS;
 
 exports.sample = H.sample
 

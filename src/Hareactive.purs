@@ -4,6 +4,9 @@ module Data.Hareactive
   , Stream
   , filter
   , keepWhen
+  , sample
+  , scan
+  , scanS
   ) where
 
 import Prelude (class Semigroup, class Functor, (<<<), class Apply, class Applicative, class Bind, class Monad)
@@ -83,6 +86,11 @@ scan :: forall a b. (a -> b -> b) -> b -> Stream a -> Behavior (Behavior b)
 scan = runFn3 _scan <<< mkFn2
 
 foreign import _scan :: forall a b. Fn3 (Fn2 a b b) b (Stream a) (Behavior (Behavior b))
+
+scanS :: forall a b. (a -> b -> b) -> b -> Stream a -> Behavior (Stream b)
+scanS = runFn3 _scanS <<< mkFn2
+
+foreign import _scanS :: forall a b. Fn3 (Fn2 a b b) b (Stream a) (Behavior (Stream b))
 
 --------------------------------------------------------------------------------
 -- Now -------------------------------------------------------------------------
