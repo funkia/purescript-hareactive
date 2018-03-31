@@ -7,6 +7,7 @@ module Data.Hareactive
   , sample
   , scan
   , scanS
+  , switchStream
   ) where
 
 import Prelude (class Semigroup, class Functor, (<<<), class Apply, class Applicative, class Bind, class Monad)
@@ -18,16 +19,43 @@ import Data.Function.Uncurried (Fn2, Fn3, mkFn2, runFn2, runFn3)
 
 foreign import data FRP :: Effect
 
-foreign import data Now :: Type -> Type
-
+-- | A behavior represents a value that changes over time. I.e. a value that
+-- | depends on time. Semantically a `Behavior a` can be understood as being
+-- | equivalent to a function `Time -> a`. A behavior isn't implemented as a
+-- | function. But the semantics serve as a mental model in terms of which all
+-- | other operations can be explained.
 foreign import data Behavior :: Type -> Type
 
+-- | A stream represents events that occur at specific moments in time.
+-- | Semantically a `Stream a` can be understood as `List (Time, a)`. That is,
+-- | a list of values where each value is associated with a specific moment in
+-- | time. The time values have to be increasing. But, they do _not_ have to be
+-- | _strictly_ increasing. This means that a stream can have several
+-- | occurrences at the same moment in time. This can be very useful in certain
+-- | circumstances.
 foreign import data Stream :: Type -> Type
+
+-- | A `Now` represents a computation that occurs at a specific moment in time.
+-- | That moment is always "now". This means that computations inside the now
+-- | can depend on time—but only the current point in time. The requirement
+-- | that `Time` is always the current moment in time is enforced and
+-- | guaranteed by the API for working with time.
+-- |
+-- | In addition to containing time-dependent computations a `Now` can also
+-- | contain computations with side-effects. An approximate model of a `Now a`
+-- | is that it is equivalent to `Time -> IO a`.
+-- |
+-- | `Now` servers two purposes in Hareactive: It makes it possible to create
+-- | stateful behaviors that depends on the past _without_ introducing
+-- | space-leaks (a notorious problem in FRP). Additionally, it is the glue
+-- | between FRP primitives and effectful computations.
+foreign import data Now :: Type -> Type
 
 --------------------------------------------------------------------------------
 -- Stream ----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
+-- | The semigroup instance of Stream.
 instance semigroupStream :: Semigroup (Stream a) where
   append = runFn2 _combine
 
@@ -97,6 +125,8 @@ scanS :: forall a b. (a -> b -> b) -> b -> Stream a -> Behavior (Stream b)
 scanS = runFn3 _scanS <<< mkFn2
 
 foreign import _scanS :: forall a b. Fn3 (Fn2 a b b) b (Stream a) (Behavior (Stream b))
+
+foreign import switchStream :: forall a. Behavior (Stream a) -> Stream a
 
 --------------------------------------------------------------------------------
 -- Now -------------------------------------------------------------------------

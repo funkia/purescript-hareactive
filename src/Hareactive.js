@@ -32,6 +32,8 @@ exports._scan = H.scan;
 
 exports._scanS = H.scanS;
 
+exports.switchStream = H.switchStream;
+
 exports.sample = H.sample
 
 exports._mapNow = exports._mapStream;
