@@ -24,5 +24,10 @@ Hareactive supports stateful behaviors (i.e. behaviors that depends on the
 past). It does so while avoiding the problems with space and time leaks that
 FRP are notorius for.
 
+A key focus is to implement a simple precise semantic model following the
+principles of Conal Elliott. The semantics serve as a specification for
+determining the correctness of the implementation. Additionally, it is a mental
+model which can be used to reason about the library.
+
 Hareactive is implemented in carefully optimized TypeScript.
 

@@ -23,7 +23,7 @@ foreign import data FRP :: Effect
 -- | depends on time. Semantically a `Behavior a` can be understood as being
 -- | equivalent to a function `Time -> a`. A behavior isn't implemented as a
 -- | function. But the semantics serve as a mental model in terms of which all
--- | other operations can be explained.
+-- | other operations can be understood.
 foreign import data Behavior :: Type -> Type
 
 -- | A stream represents events that occur at specific moments in time.
@@ -55,12 +55,26 @@ foreign import data Now :: Type -> Type
 -- Stream ----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
--- | The semigroup instance of Stream.
+-- | The `Semigroup` instance merges to streams by combining their occurrences
+-- | while keeping them ordered with respect to time.
+-- |
+-- | One detail to be aware of is what happens in case both the left and the
+-- | right stream contains occurences that occur simultaneously.  The
+-- | `sortWith` in the semantics below is _stable_. This implies that
+-- | simultaneous ocurrences in the left stream will occurr before ones in the
+-- | righ stream.
+-- |
+-- | Semantically.
+-- |
+-- | ``` purescript
+-- | append s1 s2 = sortWith (\(time, a) -> time) (s1 <> s2)
+-- | ```
 instance semigroupStream :: Semigroup (Stream a) where
   append = runFn2 _combine
 
 foreign import _combine :: forall a. Fn2 (Stream a) (Stream a) (Stream a)
 
+-- | The `Monoid` instance lets `mempty` be a stream without any occurrences.
 instance monoidStream :: Monoid (Stream a) where
   mempty = _memptyStream
 
@@ -68,6 +82,11 @@ foreign import _memptyStream :: forall a. Stream a
 
 -- | Filter a stream, keeping the elements which satisfy a predicate function,
 -- | creating a new stream.
+-- |
+-- | Semantically.
+-- | ```
+-- | filter p s = filter (\(time, a) -> p x) s
+-- | ```
 filter :: forall a. (a -> Boolean) -> Stream a -> Stream a
 filter = runFn2 _filter
 
