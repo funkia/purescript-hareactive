@@ -7,6 +7,7 @@ module Data.Hareactive
   , sample
   , scan
   , scanS
+  , stepper
   , switchStream
   ) where
 
@@ -146,6 +147,11 @@ scanS = runFn3 _scanS <<< mkFn2
 foreign import _scanS :: forall a b. Fn3 (Fn2 a b b) b (Stream a) (Behavior (Stream b))
 
 foreign import switchStream :: forall a. Behavior (Stream a) -> Stream a
+
+stepper :: forall a. a -> Stream a -> Behavior (Behavior a)
+stepper = runFn2 _stepper
+
+foreign import _stepper :: forall a. Fn2 a (Stream a) (Behavior (Behavior a))
 
 --------------------------------------------------------------------------------
 -- Now -------------------------------------------------------------------------

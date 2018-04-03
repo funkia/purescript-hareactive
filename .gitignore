@@ -4,6 +4,8 @@ bower_components
 node_modules
 tags
 # Generated files
-.generated-docs
+generated-docs
 .psci
 output
+bundle.js
+

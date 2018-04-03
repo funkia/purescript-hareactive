@@ -30,6 +30,8 @@ exports._keepWhen = H.keepWhen;
 
 exports._scan = H.scan;
 
+exports._stepper = H.stepper;
+
 exports._scanS = H.scanS;
 
 exports.switchStream = H.switchStream;
