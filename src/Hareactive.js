@@ -10,11 +10,16 @@ function bind(mf, f) {
 
 exports._memptyStream = H.empty;
 
-exports._mapStream = function _map(f, s) {
+function _map(f, s) {
   return s.map(f);
 }
 
-exports._mapBehavior = exports._mapStream;
+// Future
+exports._mapStream = _map;
+
+exports._mapFuture =_map;
+
+exports._mapBehavior = _map;
 
 exports._applyBehavior = apply;
 
@@ -23,6 +28,14 @@ exports._bindBehavior = bind;
 exports._pureBehavior = H.Behavior.of;
 
 exports._filter = H.filter;
+
+exports._apply = H.apply;
+
+exports._filterApply = H.filterApply;
+
+exports._snapshot = H.snapshot;
+
+exports._snapshotWith = H.snapshotWith;
 
 exports._combine = H.combine;
 
@@ -35,6 +48,10 @@ exports._stepper = H.stepper;
 exports._scanS = H.scanS;
 
 exports.switchStream = H.switchStream;
+
+exports._switchTo = H.switchTo;
+
+exports._switcher = H.switcher;
 
 exports.sample = H.sample
 

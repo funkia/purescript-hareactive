@@ -2,19 +2,26 @@ module Data.Hareactive
   ( Now
   , Behavior
   , Stream
+  , Future
+  , apply
+  , filterApply
   , filter
   , keepWhen
   , sample
+  , snapshot
+  , snapshotWith
   , scan
   , scanS
   , stepper
+  , switchTo
+  , switcher
   , switchStream
   ) where
 
-import Prelude (class Semigroup, class Functor, (<<<), class Apply, class Applicative, class Bind, class Monad)
-import Data.Monoid (class Monoid)
 import Control.Monad.Eff (kind Effect)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2, runFn2, runFn3)
+import Data.Monoid (class Monoid)
+import Prelude (class Semigroup, class Functor, (<<<), class Apply, class Applicative, class Bind, class Monad)
 
 -- Types
 
@@ -27,13 +34,20 @@ foreign import data FRP :: Effect
 -- | other operations can be understood.
 foreign import data Behavior :: Type -> Type
 
--- | A stream represents events that occur at specific moments in time.
--- | Semantically a `Stream a` can be understood as `List (Time, a)`. That is,
--- | a list of values where each value is associated with a specific moment in
--- | time. The time values have to be increasing. But, they do _not_ have to be
--- | _strictly_ increasing. This means that a stream can have several
--- | occurrences at the same moment in time. This can be very useful in certain
--- | circumstances.
+-- | A future is a value associated with some point in time. Semantically a
+-- | `Future a` is equivalent to `(Time, a)`. That is, a value tagged with
+-- | time. In practice, `Stream` is used more often than `Future`. `Future` is
+-- | useful in circumstances where some event occurs exactly once in the
+-- | future.
+foreign import data Future :: Type -> Type
+
+-- | A stream represents events that occur at specific moments in time. It is a
+-- | list of future values.  Semantically a `Stream a` can be understood as
+-- | `List (Time, a)`. That is, a list of values where each value is associated
+-- | with a specific moment in time. The time values have to be increasing.
+-- | But, they do _not_ have to be _strictly_ increasing. This means that a
+-- | stream can have several occurrences at the same moment in time. This can
+-- | be very useful in certain circumstances.
 foreign import data Stream :: Type -> Type
 
 -- | A `Now` represents a computation that occurs at a specific moment in time.
@@ -51,52 +65,6 @@ foreign import data Stream :: Type -> Type
 -- | space-leaks (a notorious problem in FRP). Additionally, it is the glue
 -- | between FRP primitives and effectful computations.
 foreign import data Now :: Type -> Type
-
---------------------------------------------------------------------------------
--- Stream ----------------------------------------------------------------------
---------------------------------------------------------------------------------
-
--- | The `Semigroup` instance merges to streams by combining their occurrences
--- | while keeping them ordered with respect to time.
--- |
--- | One detail to be aware of is what happens in case both the left and the
--- | right stream contains occurences that occur simultaneously.  The
--- | `sortWith` in the semantics below is _stable_. This implies that
--- | simultaneous ocurrences in the left stream will occurr before ones in the
--- | righ stream.
--- |
--- | Semantically.
--- |
--- | ``` purescript
--- | append s1 s2 = sortWith (\(time, a) -> time) (s1 <> s2)
--- | ```
-instance semigroupStream :: Semigroup (Stream a) where
-  append = runFn2 _combine
-
-foreign import _combine :: forall a. Fn2 (Stream a) (Stream a) (Stream a)
-
--- | The `Monoid` instance lets `mempty` be a stream without any occurrences.
-instance monoidStream :: Monoid (Stream a) where
-  mempty = _memptyStream
-
-foreign import _memptyStream :: forall a. Stream a
-
--- | Filter a stream, keeping the elements which satisfy a predicate function,
--- | creating a new stream.
--- |
--- | Semantically.
--- | ```
--- | filter p s = filter (\(time, a) -> p x) s
--- | ```
-filter :: forall a. (a -> Boolean) -> Stream a -> Stream a
-filter = runFn2 _filter
-
-foreign import _filter :: forall a. Fn2 (a -> Boolean) (Stream a) (Stream a)
-
-instance functorStream :: Functor Stream where
-  map = runFn2 _mapStream
-
-foreign import _mapStream :: forall a b. Fn2 (a -> b) (Stream a) (Stream b)
 
 --------------------------------------------------------------------------------
 -- Behavior --------------------------------------------------------------------
@@ -124,10 +92,82 @@ foreign import _bindBehavior :: forall a b. Fn2 (Behavior a) (a -> Behavior b) (
 
 instance monadBehavior :: Monad Behavior
 
+--------------------------------------------------------------------------------
+-- Future ----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+instance functorFuture :: Functor Future where
+  map = runFn2 _mapFuture
+
+foreign import _mapFuture :: forall a b. Fn2 (a -> b) (Future a) (Future b)
+
+--------------------------------------------------------------------------------
+-- Stream ----------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+-- | The `Semigroup` instance merges to streams by combining their occurrences
+-- | while keeping them ordered with respect to time.
+-- |
+-- | One detail to be aware of is what happens in case both the left and the
+-- | right stream contains occurences that occur simultaneously.  The
+-- | `sortWith` in the semantics below is _stable_. This implies that
+-- | simultaneous ocurrences in the left stream will occurr before ones in the
+-- | righ stream.
+-- |
+-- | Semantically.
+-- |
+-- | ```purescript
+-- | append s1 s2 = sortWith (\(time, a) -> time) (s1 <> s2)
+-- | ```
+instance semigroupStream :: Semigroup (Stream a) where
+  append = runFn2 _combine
+
+foreign import _combine :: forall a. Fn2 (Stream a) (Stream a) (Stream a)
+
+-- | The `Monoid` instance lets `mempty` be a stream without any occurrences.
+instance monoidStream :: Monoid (Stream a) where
+  mempty = _memptyStream
+
+foreign import _memptyStream :: forall a. Stream a
+
+-- | Filter a stream, keeping the elements which satisfy a predicate function,
+-- | creating a new stream.
+-- |
+-- | Semantically.
+-- | ```purescript
+-- | filter p s = filter (\(time, a) -> p x) s
+-- | ```
+filter :: forall a. (a -> Boolean) -> Stream a -> Stream a
+filter = runFn2 _filter
+
+foreign import _filter :: forall a. Fn2 (a -> Boolean) (Stream a) (Stream a)
+
+instance functorStream :: Functor Stream where
+  map = runFn2 _mapStream
+
+foreign import _mapStream :: forall a b. Fn2 (a -> b) (Stream a) (Stream b)
 
 --------------------------------------------------------------------------------
 -- Behavior and stream ---------------------------------------------------------
 --------------------------------------------------------------------------------
+
+-- | Whenever the stream has an occurence the function at the behavior is
+-- | applied to the value of the occurrence.
+-- |
+-- | Semantically.
+-- | ```purescript
+-- | apply b s = map (\{time, a} -> {time, a: b time a}) s
+-- | ```
+apply :: forall a b. Behavior (a -> b) -> Stream a -> Stream b
+apply = runFn2 _apply
+
+foreign import _apply :: forall a b. Fn2 (Behavior (a -> b)) (Stream a) (Stream b)
+
+-- | A combination of `filter` and `apply`
+filterApply :: forall a. Behavior (a -> Boolean) -> Stream a -> Stream a
+filterApply = runFn2 _filterApply
+
+foreign import _filterApply :: forall a. Fn2 (Behavior (a -> Boolean)) (Stream a) (Stream a)
 
 -- | Filter a stream, keeping the elements which satisfy a predicate function,
 -- | creating a new stream.
@@ -146,17 +186,55 @@ scanS = runFn3 _scanS <<< mkFn2
 
 foreign import _scanS :: forall a b. Fn3 (Fn2 a b b) b (Stream a) (Behavior (Stream b))
 
-foreign import switchStream :: forall a. Behavior (Stream a) -> Stream a
+-- | Creates a stream that occurs exactly when the given stream occurs. Every
+-- | time the stream s has an occurrence the current value of the behavior is
+-- | sampled. The value in the occurrence is then replaced with the sampled
+-- | value.
+snapshot :: forall a b. Behavior a -> Stream b -> Stream a
+snapshot = runFn2 _snapshot
 
+foreign import _snapshot :: forall a b. Fn2 (Behavior a) (Stream b) (Stream a)
+
+-- | Returns a stream that occurs whenever the given stream occurs. At each
+-- | occurrence the value and the value from the behavior is passed to the
+-- | function and the return value is the value of the returned streams
+-- | occurrence.
+snapshotWith :: forall a b c. (a -> b -> c) -> Behavior b -> Stream a -> Stream c
+snapshotWith f b a = runFn3 _snapshotWith (mkFn2 f) b a
+
+foreign import _snapshotWith :: forall a b c. Fn3 (Fn2 a b c) (Behavior b) (Stream a) (Stream c)
+
+-- | Creates a behavior whose value is the last occurrence in the stream.
 stepper :: forall a. a -> Stream a -> Behavior (Behavior a)
 stepper = runFn2 _stepper
 
 foreign import _stepper :: forall a. Fn2 a (Stream a) (Behavior (Behavior a))
 
+-- | Creates a new behavior that acts exactly like initial until next occurs
+-- | after which it acts like the behavior it contains.
+switchTo :: forall a. Behavior a -> Future (Behavior a) -> Behavior a
+switchTo = runFn2 _switchTo
+
+foreign import _switchTo :: forall a. Fn2 (Behavior a) (Future (Behavior a)) (Behavior a)
+
+-- | Creates a behavior that initially acts like the first behavior and then
+-- | switches to each new behavior from the stream.
+switcher :: forall a. Behavior a -> Stream (Behavior a) -> Behavior (Behavior a)
+switcher = runFn2 _switcher
+
+foreign import _switcher :: forall a. Fn2 (Behavior a) (Stream (Behavior a)) (Behavior (Behavior a))
+
+-- | Takes a stream valued behavior and returns a stream that emits values from
+-- | the current stream at the behavior. I.e. the returned stream always
+-- | "switches" to the current stream at the behavior.
+foreign import switchStream :: forall a. Behavior (Stream a) -> Stream a
+
 --------------------------------------------------------------------------------
 -- Now -------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
+-- | Returns the current value of the behavior in the `Now`. This is possible
+-- | because computations in the `Now` monad have an associated point in time.
 foreign import sample :: forall a. Behavior a -> Now a
 
 instance functorNow :: Functor Now where
