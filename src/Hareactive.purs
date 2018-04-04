@@ -171,11 +171,22 @@ foreign import _filterApply :: forall a. Fn2 (Behavior (a -> Boolean)) (Stream a
 
 -- | Filter a stream, keeping the elements which satisfy a predicate function,
 -- | creating a new stream.
+-- |
+-- | ```purescrept
+-- | keepWhen s b = filter (\{time, a} -> b time) s
+-- | ```
 keepWhen :: forall a. Stream a -> Behavior Boolean -> Stream a
 keepWhen = runFn2 _keepWhen
 
 foreign import _keepWhen :: forall a. Fn2 (Stream a) (Behavior Boolean) (Stream a)
 
+-- | For each occurrence on the stream the function is applied to the value and
+-- | the accumulator.
+-- |
+-- | ```purescrept
+-- | scan f a s =
+-- |   \from, to -> foldr f a <<< map (_.a) <<< filter ({time} -> from <= time && to <= endT) $ s
+-- | ```
 scan :: forall a b. (a -> b -> b) -> b -> Stream a -> Behavior (Behavior b)
 scan = runFn3 _scan <<< mkFn2
 
@@ -210,8 +221,8 @@ stepper = runFn2 _stepper
 
 foreign import _stepper :: forall a. Fn2 a (Stream a) (Behavior (Behavior a))
 
--- | Creates a new behavior that acts exactly like initial until next occurs
--- | after which it acts like the behavior it contains.
+-- | Creates a new behavior that acts exactly like the first behavior until the
+-- | future occurs after which it acts like the behavior from the future.
 switchTo :: forall a. Behavior a -> Future (Behavior a) -> Behavior a
 switchTo = runFn2 _switchTo
 
@@ -228,6 +239,20 @@ foreign import _switcher :: forall a. Fn2 (Behavior a) (Stream (Behavior a)) (Be
 -- | the current stream at the behavior. I.e. the returned stream always
 -- | "switches" to the current stream at the behavior.
 foreign import switchStream :: forall a. Behavior (Stream a) -> Stream a
+
+-- | A behavior whose value is the number of milliseconds elapsed since UNIX
+-- | epoch.
+foreign import time :: Behavior Number
+
+-- | A behavior giving access to continous time. When sampled the outer
+-- | behavior returns a behavior whose value is the time since the outer
+-- | behavior was sampled.
+-- |
+-- | Semantically.
+-- | ```purescrept
+-- | timeFrom = \from, to -> to - from
+-- | ```
+foreign import timeFrom :: Behavior (Behavior Number)
 
 --------------------------------------------------------------------------------
 -- Now -------------------------------------------------------------------------

@@ -49,6 +49,10 @@ exports._scanS = H.scanS;
 
 exports.switchStream = H.switchStream;
 
+exports.time = H.time;
+
+exports.timeFrom = H.timeFrom;
+
 exports._switchTo = H.switchTo;
 
 exports._switcher = H.switcher;
