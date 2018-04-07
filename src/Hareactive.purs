@@ -18,7 +18,7 @@ module Data.Hareactive
   , switchStream
   ) where
 
-import Control.Monad.Eff (kind Effect)
+import Control.Monad.Eff (Eff, kind Effect)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2, runFn2, runFn3)
 import Data.Monoid (class Monoid)
 import Prelude (class Semigroup, class Functor, (<<<), class Apply, class Applicative, class Bind, class Monad)
@@ -284,3 +284,11 @@ foreign import _bindNow :: forall a b. Fn2 (Now a) (a -> Now b) (Now b)
 
 instance monadNow :: Monad Now
 
+-- | Convert a future now computation into a now computation of a future. This
+-- | function is what allows a now computation to reach beyond the current
+-- | moment that it is running in.
+foreign import plan :: forall a. Future (Now a) -> Now (Future a)
+
+-- | Runs an `Eff` inside the `Now`. The side-effect will be executed when the
+-- | `Now` computation is being executed.
+foreign import runEff :: forall a b. Eff a b -> Now b

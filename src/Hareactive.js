@@ -57,6 +57,8 @@ exports._switchTo = H.switchTo;
 
 exports._switcher = H.switcher;
 
+// Now
+
 exports.sample = H.sample
 
 exports._mapNow = exports._mapStream;
@@ -66,3 +68,12 @@ exports._applyNow = apply;
 exports._pureNow = H.Now.of;
 
 exports._bindNow = bind;
+
+exports.plan = plan;
+
+exports.runEff = function(eff) {
+  // This relies on the fact that the function given to `map` is only executed
+  // once the `Now` is being run. This ensures that the eff is only executed
+  // inside another eff (originating in `runNow`).
+  return H.Now.of(undefined).map(function(_) { return eff(); });
+}
