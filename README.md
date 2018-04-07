@@ -1,5 +1,7 @@
 # purescript-hareactive
 
+[![Latest release](http://img.shields.io/bower/v/purescript-hareactive.svg)](https://github.com/funkia/purescript-hareactive/releases)
+
 Hareactive is a higher-order high-performance fully featured FRP library.
 Hareactive aims to be practical, powerful and simple.
 
@@ -31,3 +33,14 @@ model which can be used to reason about the library.
 
 Hareactive is implemented in carefully optimized TypeScript.
 
+## Install
+
+```
+npm i @funkia/hareactive
+bower install --save purescript-hareactive
+```
+
+## Documentation
+
+Module documentation is published on
+[Pursuit](https://pursuit.purescript.org/packages/purescript-hareactive).
