@@ -16,6 +16,8 @@ module Data.Hareactive
   , switchTo
   , switcher
   , switchStream
+  , time
+  , timeFrom
   ) where
 
 import Control.Monad.Eff (Eff, kind Effect)

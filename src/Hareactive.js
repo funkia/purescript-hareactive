@@ -59,7 +59,7 @@ exports._switcher = H.switcher;
 
 // Now
 
-exports.sample = H.sample
+exports.sample = H.sample;
 
 exports._mapNow = exports._mapStream;
 
@@ -69,7 +69,7 @@ exports._pureNow = H.Now.of;
 
 exports._bindNow = bind;
 
-exports.plan = plan;
+exports.plan = H.plan;
 
 exports.runEff = function(eff) {
   // This relies on the fact that the function given to `map` is only executed
