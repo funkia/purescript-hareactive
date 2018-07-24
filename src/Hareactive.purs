@@ -18,16 +18,14 @@ module Data.Hareactive
   , switchStream
   , time
   , timeFrom
+  , runEffect
   ) where
 
-import Control.Monad.Eff (Eff, kind Effect)
+import Effect (Effect)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2, runFn2, runFn3)
-import Data.Monoid (class Monoid)
-import Prelude (class Semigroup, class Functor, (<<<), class Apply, class Applicative, class Bind, class Monad)
+import Prelude (class Semigroup, class Monoid, class Functor, (<<<), class Apply, class Applicative, class Bind, class Monad)
 
 -- Types
-
-foreign import data FRP :: Effect
 
 -- | A behavior represents a value that changes over time. I.e. a value that
 -- | depends on time. Semantically a `Behavior a` can be understood as being
@@ -291,6 +289,6 @@ instance monadNow :: Monad Now
 -- | moment that it is running in.
 foreign import plan :: forall a. Future (Now a) -> Now (Future a)
 
--- | Runs an `Eff` inside the `Now`. The side-effect will be executed when the
+-- | Runs an `Effect` inside the `Now`. The side-effect will be executed when the
 -- | `Now` computation is being executed.
-foreign import runEff :: forall a b. Eff a b -> Now b
+foreign import runEffect :: forall a. Effect a -> Now a
