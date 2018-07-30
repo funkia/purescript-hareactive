@@ -1,4 +1,4 @@
-module Data.Hareactive
+module Hareactive
   ( Now
   , Behavior
   , Stream
