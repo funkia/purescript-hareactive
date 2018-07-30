@@ -18,6 +18,7 @@ module Hareactive
   , switchStream
   , time
   , timeFrom
+  , changes
   , runEffect
   ) where
 
@@ -101,11 +102,38 @@ instance functorFuture :: Functor Future where
 
 foreign import _mapFuture :: forall a b. Fn2 (a -> b) (Future a) (Future b)
 
+-- | The `Semigroup` instance returns the future that occurs first.
+-- | The expression `a <> b` is equal to `a` if `a` occurs before `b`
+-- | and `b` otherwise.
+instance semigroupFuture :: Semigroup (Future a) where
+  append = runFn2 _appendFuture
+
+foreign import _appendFuture :: forall a. Fn2 (Future a) (Future a) (Future a)
+
+instance applyFuture :: Apply Future where
+  -- | Occurs once both futures have occured and applies the functions
+  -- | in the former to the value in the later.
+  apply = runFn2 _applyFuture
+
+foreign import _applyFuture :: forall a b. Fn2 (Future (a -> b)) (Future a) (Future b)
+
+instance applicativeFuture :: Applicative Future where
+  pure = _pureFuture
+
+foreign import _pureFuture :: forall a. a -> Future a
+
+instance bindFuture :: Bind Future where
+  bind = runFn2 _bindFuture
+
+foreign import _bindFuture :: forall a b. Fn2 (Future a) (a -> Future b) (Future b)
+
+instance monadFuture :: Monad Future
+
 --------------------------------------------------------------------------------
 -- Stream ----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
--- | The `Semigroup` instance merges to streams by combining their occurrences
+-- | The `Semigroup` instance merges two streams by combining their occurrences
 -- | while keeping them ordered with respect to time.
 -- |
 -- | One detail to be aware of is what happens in case both the left and the
@@ -253,6 +281,10 @@ foreign import time :: Behavior Number
 -- | timeFrom = \from, to -> to - from
 -- | ```
 foreign import timeFrom :: Behavior (Behavior Number)
+
+-- | Takes a behavior and returns a stream that has an occurrence
+-- | whenever the behavior changes.
+foreign import changes :: forall a. Behavior a -> Stream a
 
 --------------------------------------------------------------------------------
 -- Now -------------------------------------------------------------------------

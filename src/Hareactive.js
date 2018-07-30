@@ -15,9 +15,26 @@ function _map(f, s) {
 }
 
 // Future
-exports._mapStream = _map;
 
 exports._mapFuture =_map;
+
+exports._appendFuture = function(fa, fb) {
+  return fa.combine(fb);
+};
+
+exports._applyFuture = function(f, a) {
+  return a.ap(f);
+}
+
+exports._pureFuture = H.Future.of;
+
+exports._bindFuture = function(mf, f) {
+  return mf.chain(f);
+}
+
+// Stream
+
+exports._mapStream = _map;
 
 exports._mapBehavior = _map;
 
@@ -56,6 +73,8 @@ exports.timeFrom = H.timeFrom;
 exports._switchTo = H.switchTo;
 
 exports._switcher = H.switcher;
+
+exports.changes = H.changes;
 
 // Now
 
