@@ -20,14 +20,18 @@ module Hareactive
   , time
   , timeFrom
   , changes
+  , performAff
   ) where
 
+import Data.Either (Either)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2, runFn2, runFn3)
 import Data.Maybe (Maybe, isJust, fromJust)
 import Effect (Effect)
-import Effect.Class (class MonadEffect)
+import Effect.Exception (Error)
+import Effect.Aff (Aff, runAff)
+import Effect.Class (class MonadEffect, liftEffect)
 import Partial.Unsafe (unsafePartial)
-import Prelude (class Semigroup, class Monoid, class Functor, map, (<<<), class Apply, class Applicative, class Bind, class Monad)
+import Prelude
 
 -- Types
 
@@ -338,3 +342,16 @@ foreign import liftEffectNow :: forall a. Effect a -> Now a
 -- | function is what allows a now computation to reach beyond the current
 -- | moment that it is running in.
 foreign import plan :: forall a. Future (Now a) -> Now (Future a)
+
+foreign import sinkFuture :: forall a. Effect (Future a)
+
+resolveFuture :: forall a. Future a -> a -> Effect Unit
+resolveFuture = runFn2 _resolveFuture
+
+foreign import _resolveFuture :: forall a. Fn2 (Future a) a (Effect Unit)
+
+performAff :: forall a. Aff a -> Now (Future (Either Error a))
+performAff aff = do
+  future <- liftEffect sinkFuture
+  _ <- liftEffect $ runAff (resolveFuture future) aff
+  pure future

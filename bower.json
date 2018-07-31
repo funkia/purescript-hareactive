@@ -18,6 +18,7 @@
     "purescript-maybe": "^4.0.0",
     "purescript-partial": "^2.0.0",
     "purescript-effect": "^2.0.0",
+    "purescript-aff": "^5.0.1",
     "purescript-tuples": "^5.0.0"
   },
   "devDependencies": {

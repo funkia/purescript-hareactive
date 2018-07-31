@@ -96,3 +96,11 @@ exports.liftEffectNow = function(eff) {
   // inside another eff (originating in `runNow`).
   return H.Now.of(undefined).map(function(_) { return eff(); });
 }
+
+exports.sinkFuture = H.sinkFuture;
+
+exports._resolveFuture = function(future, value) {
+  return function() {
+    future.resolve(value);
+  }
+}
