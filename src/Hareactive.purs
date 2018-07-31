@@ -6,6 +6,7 @@ module Hareactive
   , apply
   , filterApply
   , filter
+  , filterJust
   , keepWhen
   , sample
   , snapshot
@@ -19,12 +20,14 @@ module Hareactive
   , time
   , timeFrom
   , changes
-  , runEffect
   ) where
 
-import Effect (Effect)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2, runFn2, runFn3)
-import Prelude (class Semigroup, class Monoid, class Functor, (<<<), class Apply, class Applicative, class Bind, class Monad)
+import Data.Maybe (Maybe, isJust, fromJust)
+import Effect (Effect)
+import Effect.Class (class MonadEffect)
+import Partial.Unsafe (unsafePartial)
+import Prelude (class Semigroup, class Monoid, class Functor, map, (<<<), class Apply, class Applicative, class Bind, class Monad)
 
 -- Types
 
@@ -169,6 +172,14 @@ filter :: forall a. (a -> Boolean) -> Stream a -> Stream a
 filter = runFn2 _filter
 
 foreign import _filter :: forall a. Fn2 (a -> Boolean) (Stream a) (Stream a)
+
+unsafeFromJust :: forall a. Maybe a -> a
+unsafeFromJust m = (unsafePartial (fromJust m))
+
+-- | Removes all `Nothing` values from the stream and extracts the
+-- | values from the remaining `Just`s.
+filterJust :: forall a. Stream (Maybe a) -> Stream a
+filterJust = map unsafeFromJust <<< filter isJust
 
 instance functorStream :: Functor Stream where
   map = runFn2 _mapStream
@@ -316,11 +327,14 @@ foreign import _bindNow :: forall a b. Fn2 (Now a) (a -> Now b) (Now b)
 
 instance monadNow :: Monad Now
 
+-- | Runs an `Effect` inside a `Now`. The side-effect will be executed
+-- | when the `Now` computation is being executed.
+instance monadEffectNow :: MonadEffect Now where
+  liftEffect = liftEffectNow
+
+foreign import liftEffectNow :: forall a. Effect a -> Now a
+
 -- | Convert a future now computation into a now computation of a future. This
 -- | function is what allows a now computation to reach beyond the current
 -- | moment that it is running in.
 foreign import plan :: forall a. Future (Now a) -> Now (Future a)
-
--- | Runs an `Effect` inside the `Now`. The side-effect will be executed when the
--- | `Now` computation is being executed.
-foreign import runEffect :: forall a. Effect a -> Now a

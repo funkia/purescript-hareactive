@@ -90,7 +90,7 @@ exports._bindNow = bind;
 
 exports.plan = H.plan;
 
-exports.runEffect = function(eff) {
+exports.liftEffectNow = function(eff) {
   // This relies on the fact that the function given to `map` is only executed
   // once the `Now` is being run. This ensures that the eff is only executed
   // inside another eff (originating in `runNow`).
