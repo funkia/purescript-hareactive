@@ -104,3 +104,5 @@ exports._resolveFuture = function(future, value) {
     future.resolve(value);
   }
 }
+
+exports._performCb = H.performCb;

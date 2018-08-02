@@ -21,17 +21,20 @@ module Hareactive
   , timeFrom
   , changes
   , performAff
+  , runStreamAff
   ) where
 
+import Prelude
+
 import Data.Either (Either)
-import Data.Function.Uncurried (Fn2, Fn3, mkFn2, runFn2, runFn3)
+import Data.Function.Uncurried (Fn1, Fn2, Fn3, mkFn2, runFn2, runFn3)
 import Data.Maybe (Maybe, isJust, fromJust)
 import Effect (Effect)
-import Effect.Exception (Error)
-import Effect.Aff (Aff, runAff)
+import Effect.Aff (Aff, runAff_)
 import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Exception (Error)
+import Effect.Uncurried (EffectFn1, EffectFn2, mkEffectFn2, runEffectFn1, runEffectFn2)
 import Partial.Unsafe (unsafePartial)
-import Prelude
 
 -- Types
 
@@ -353,5 +356,13 @@ foreign import _resolveFuture :: forall a. Fn2 (Future a) a (Effect Unit)
 performAff :: forall a. Aff a -> Now (Future (Either Error a))
 performAff aff = do
   future <- liftEffect sinkFuture
-  _ <- liftEffect $ runAff (resolveFuture future) aff
+  liftEffect $ runAff_ (resolveFuture future) aff
   pure future
+
+runStreamAff :: forall a. Stream (Aff a) -> Now (Stream (Either Error a))
+runStreamAff s = liftEffect $ performCb (flip runAff_) s
+
+performCb :: forall a b. (a -> (b -> Effect Unit) -> Effect Unit) -> Stream a -> Effect (Stream b)
+performCb cb = runEffectFn2 _performCb (mkEffectFn2 (\a resultCb -> cb a (runEffectFn1 resultCb)))
+
+foreign import _performCb :: forall a b. EffectFn2 (EffectFn2 a (EffectFn1 b Unit) Unit) (Stream a) (Stream b)
