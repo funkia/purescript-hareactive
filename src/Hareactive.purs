@@ -7,6 +7,7 @@ module Hareactive
   , filterApply
   , filter
   , filterJust
+  , split
   , keepWhen
   , sample
   , snapshot
@@ -26,9 +27,11 @@ module Hareactive
 
 import Prelude
 
-import Data.Either (Either)
-import Data.Function.Uncurried (Fn1, Fn2, Fn3, mkFn2, runFn2, runFn3)
+import Data.Array (unsafeIndex)
+import Data.Either (Either, isLeft)
+import Data.Function.Uncurried (Fn2, Fn3, mkFn2, runFn2, runFn3)
 import Data.Maybe (Maybe, isJust, fromJust)
+import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -187,6 +190,23 @@ unsafeFromJust m = (unsafePartial (fromJust m))
 -- | values from the remaining `Just`s.
 filterJust :: forall a. Stream (Maybe a) -> Stream a
 filterJust = map unsafeFromJust <<< filter isJust
+
+-- | Takes a predicate and a stream. A pair of streams is returned. The first
+-- | stream includes all occurrences from the original stream for which the
+-- | predicate is satisfied and the seconds stream all occurrences for which the
+-- | predicate is false.
+-- |
+-- | Example.
+
+-- | ```purescript
+-- | Tuple smallNumbers largeNumbers = split (_ < 100) streamOfNumbers
+-- | ```
+split :: forall a. (a -> Boolean) -> Stream a -> Tuple (Stream a) (Stream a)
+split predicate stream =
+  let arrayPair = runFn2 _split predicate stream
+  in Tuple (unsafePartial $ unsafeIndex arrayPair 0) (unsafePartial $ unsafeIndex arrayPair 1)
+
+foreign import _split :: forall a. Fn2 (a -> Boolean) (Stream a) (Array (Stream a))
 
 instance functorStream :: Functor Stream where
   map = runFn2 _mapStream
