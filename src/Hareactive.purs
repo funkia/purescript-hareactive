@@ -109,16 +109,21 @@ instance monadBehavior :: Monad Behavior
 -- Future ----------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
+-- | `append` returns the future that occurs first. The expression `a <> b` is
+-- | equal to `a` if `a` occurs before `b` and `b` otherwise.
+instance semigroupFuture :: Semigroup (Future a) where
+  append = runFn2 _appendFuture
+
+-- | `mempty` is a future that never occurs.
+instance monoidFuture :: Monoid (Future a) where
+  mempty = memptyFuture
+
+foreign import memptyFuture :: forall a. Future a
+
 instance functorFuture :: Functor Future where
   map = runFn2 _mapFuture
 
 foreign import _mapFuture :: forall a b. Fn2 (a -> b) (Future a) (Future b)
-
--- | The `Semigroup` instance returns the future that occurs first.
--- | The expression `a <> b` is equal to `a` if `a` occurs before `b`
--- | and `b` otherwise.
-instance semigroupFuture :: Semigroup (Future a) where
-  append = runFn2 _appendFuture
 
 foreign import _appendFuture :: forall a. Fn2 (Future a) (Future a) (Future a)
 
@@ -170,6 +175,11 @@ instance monoidStream :: Monoid (Stream a) where
 
 foreign import _memptyStream :: forall a. Stream a
 
+instance functorStream :: Functor Stream where
+  map = runFn2 _mapStream
+
+foreign import _mapStream :: forall a b. Fn2 (a -> b) (Stream a) (Stream b)
+
 -- | Filter a stream, keeping the elements which satisfy a predicate function,
 -- | creating a new stream.
 -- |
@@ -204,11 +214,6 @@ split :: forall a. (a -> Boolean) -> Stream a -> Tuple (Stream a) (Stream a)
 split predicate stream = unsafePartial (let [x, y] = runFn2 _split predicate stream in Tuple x y)
 
 foreign import _split :: forall a. Fn2 (a -> Boolean) (Stream a) (Array (Stream a))
-
-instance functorStream :: Functor Stream where
-  map = runFn2 _mapStream
-
-foreign import _mapStream :: forall a b. Fn2 (a -> b) (Stream a) (Stream b)
 
 --------------------------------------------------------------------------------
 -- Behavior and stream ---------------------------------------------------------

@@ -16,11 +16,13 @@ function _map(f, s) {
 
 // Future
 
-exports._mapFuture =_map;
-
 exports._appendFuture = function(fa, fb) {
   return fa.combine(fb);
 };
+
+exports.memptyFuture = H.sinkFuture();
+
+exports._mapFuture =_map;
 
 exports._applyFuture = function(f, a) {
   return a.ap(f);
