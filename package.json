@@ -1,13 +1,15 @@
 {
   "name": "purescript-hareactive",
   "version": "0.0.1",
+  "private": true,
   "description": "PureScript bindings for Hareactive",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "pulp test"
+    "test": "pulp test",
+    "build": "pulp build"
   },
   "repository": {
     "type": "git",
