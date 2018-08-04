@@ -260,6 +260,7 @@ scan = runFn3 _scan <<< mkFn2
 
 foreign import _scan :: forall a b. Fn3 (Fn2 a b b) b (Stream a) (Behavior (Behavior b))
 
+-- | Similar to `scan` but instead of returning a behavior it returns a stream.
 scanS :: forall a b. (a -> b -> b) -> b -> Stream a -> Behavior (Stream b)
 scanS = runFn3 _scanS <<< mkFn2
 
@@ -375,6 +376,8 @@ resolveFuture = runFn2 _resolveFuture
 
 foreign import _resolveFuture :: forall a. Fn2 (Future a) a (Effect Unit)
 
+-- | Takes a stream of `Aff` and runs each side-effect. The returned stream has
+-- | an occurrence for the result from each asynchronous computation.
 performAff :: forall a. Aff a -> Now (Future (Either Error a))
 performAff aff = do
   future <- liftEffect sinkFuture
