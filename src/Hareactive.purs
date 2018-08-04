@@ -27,8 +27,7 @@ module Hareactive
 
 import Prelude
 
-import Data.Array (unsafeIndex)
-import Data.Either (Either, isLeft)
+import Data.Either (Either)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2, runFn2, runFn3)
 import Data.Maybe (Maybe, isJust, fromJust)
 import Data.Tuple (Tuple(..))
@@ -202,9 +201,7 @@ filterJust = map unsafeFromJust <<< filter isJust
 -- | Tuple smallNumbers largeNumbers = split (_ < 100) streamOfNumbers
 -- | ```
 split :: forall a. (a -> Boolean) -> Stream a -> Tuple (Stream a) (Stream a)
-split predicate stream =
-  let arrayPair = runFn2 _split predicate stream
-  in Tuple (unsafePartial $ unsafeIndex arrayPair 0) (unsafePartial $ unsafeIndex arrayPair 1)
+split predicate stream = unsafePartial (let [x, y] = runFn2 _split predicate stream in Tuple x y)
 
 foreign import _split :: forall a. Fn2 (a -> Boolean) (Stream a) (Array (Stream a))
 
