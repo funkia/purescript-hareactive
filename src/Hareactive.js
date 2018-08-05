@@ -110,3 +110,7 @@ exports._resolveFuture = function(future, value) {
 }
 
 exports._performCb = H.performCb;
+
+exports._runNow = function(now) {
+  return now.run();
+}

@@ -23,6 +23,7 @@ module Hareactive
   , changes
   , performAff
   , runStreamAff
+  , runNow
   ) where
 
 import Prelude
@@ -391,3 +392,9 @@ performCb :: forall a b. (a -> (b -> Effect Unit) -> Effect Unit) -> Stream a ->
 performCb cb = runEffectFn2 _performCb (mkEffectFn2 (\a resultCb -> cb a (runEffectFn1 resultCb)))
 
 foreign import _performCb :: forall a b. EffectFn2 (EffectFn2 a (EffectFn1 b Unit) Unit) (Stream a) (Stream b)
+
+-- | Returns an `Effect` that executes the `Now` computation.
+runNow :: forall a. Now a -> Effect a
+runNow = runEffectFn1 _runNow
+
+foreign import _runNow :: forall a. EffectFn1 (Now a) a
