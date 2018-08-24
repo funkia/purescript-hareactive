@@ -12,6 +12,8 @@ module Hareactive
   , sample
   , snapshot
   , snapshotWith
+  , logS
+  , logB
   , scan
   , scanS
   , stepper
@@ -21,6 +23,7 @@ module Hareactive
   , time
   , timeFrom
   , changes
+  , toggle
   , performAff
   , runStreamAff
   , runNow
@@ -216,6 +219,17 @@ split predicate stream = unsafePartial (let [x, y] = runFn2 _split predicate str
 
 foreign import _split :: forall a. Fn2 (a -> Boolean) (Stream a) (Array (Stream a))
 
+logS :: forall a. Show a => String -> Stream a -> Stream a
+logS name stream = stream
+  where _ = runFn2 _logS name $ map show stream
+
+foreign import _logS :: forall a. Show a => Fn2 String (Stream a) (Stream a)
+
+logB :: forall a. Show a => String -> Behavior a -> Behavior a
+logB name = runFn2 _logB name
+
+foreign import _logB :: forall a. Show a => Fn2 String (Behavior a) (Behavior a)
+
 --------------------------------------------------------------------------------
 -- Behavior and stream ---------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -319,7 +333,7 @@ foreign import time :: Behavior Number
 -- | behavior was sampled.
 -- |
 -- | Semantically.
--- | ```purescrept
+-- | ```purescript
 -- | timeFrom = \from, to -> to - from
 -- | ```
 foreign import timeFrom :: Behavior (Behavior Number)
@@ -327,6 +341,24 @@ foreign import timeFrom :: Behavior (Behavior Number)
 -- | Takes a behavior and returns a stream that has an occurrence
 -- | whenever the behavior changes.
 foreign import changes :: forall a. Behavior a -> Stream a
+
+-- | Creates a behavior that switches between `true` and `false`. Initally it
+-- | takes the value of its first argument. Each occurrence of the first stream
+-- | will make the behavior `true` and each occurrence of the second stream
+-- | makes the behavior `false`.
+-- |
+-- | The example below demonstrates one use case for `toggle`. A stream
+-- | `doorOpen` signifies that a door has been opened and similairly a stream
+-- | `doorClose` signifies that the door has closed. `toggle` is then used to
+-- | construct a behavior that at any time represents the state of the door.
+-- |
+-- | ```purescript
+-- | isDoorOpen <- sample $ toggle false doorOpen doorClose
+-- | ```
+toggle :: forall a b. Boolean -> Stream a -> Stream b -> Behavior (Behavior Boolean)
+toggle = runFn3 _toggle
+
+foreign import _toggle :: forall a b. Fn3 Boolean (Stream a) (Stream b) (Behavior (Behavior Boolean))
 
 --------------------------------------------------------------------------------
 -- Now -------------------------------------------------------------------------

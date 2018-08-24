@@ -80,6 +80,22 @@ exports._switcher = H.switcher;
 
 exports.changes = H.changes;
 
+exports._toggle = H.toggle;
+
+exports._logS = function() {
+  return function(name, stream) {
+    stream.log(name);
+    return stream;
+  }
+}
+
+exports._logB = function(dict) {
+  return function(name, behavior) {
+    behavior.map(dict.show).log(name);
+    return behavior;
+  }
+}
+
 // Now
 
 exports.sample = H.sample;
