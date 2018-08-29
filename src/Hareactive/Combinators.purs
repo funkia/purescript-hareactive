@@ -1,5 +1,5 @@
 module Hareactive.Combinators
-  ( apply
+  ( applyS
   , filterApply
   , filter
   , filterJust
@@ -89,17 +89,34 @@ foreign import _logB :: forall a. Show a => Fn2 String (Behavior a) (Behavior a)
 -- Behavior and stream ---------------------------------------------------------
 --------------------------------------------------------------------------------
 
--- | Whenever the stream has an occurence the function at the behavior is
--- | applied to the value of the occurrence.
+-- | This function is similar to `apply` for behaviors except the last argument
+-- | is a stream instead of a behaviors. Whenever the stream has an occurrence
+-- | the function at the behavior is applied to the value of the occurrence.
+-- |
+-- | This function has an operator alias `<~>`. The operator is intended to work
+-- | in tandem with `<$>` and `<*>`. As an example, assume that `f3` is a
+-- | function of three arguments, that `b1` and `b2` are two behaviors, and that
+-- | `s` is a stream.` Then the function can be applied to the two behaviors and
+-- | the stream in the following way.
+-- |
+-- | ```purescript
+-- | f3 <$> b1 <*> b2 <~> s
+-- | ```
+-- |
+-- | With the above code, whenever `s` has an occurrence the value of `b1`,
+-- | `b2`, and the value of the occurrence will be applied to `f3` and its
+-- | return value will be the value of the occurrence in the resulting stream.
 -- |
 -- | Semantically.
 -- | ```purescript
--- | apply b s = map (\{time, a} -> {time, a: b time a}) s
+-- | applyS b s = map (\{time, a} -> {time, a: (b time) a}) s
 -- | ```
-apply :: forall a b. Behavior (a -> b) -> Stream a -> Stream b
-apply = runFn2 _apply
+applyS :: forall a b. Behavior (a -> b) -> Stream a -> Stream b
+applyS = runFn2 _applyS
 
-foreign import _apply :: forall a b. Fn2 (Behavior (a -> b)) (Stream a) (Stream b)
+foreign import _applyS :: forall a b. Fn2 (Behavior (a -> b)) (Stream a) (Stream b)
+
+infixl 4 apply as <~>
 
 -- | A combination of `filter` and `apply`
 filterApply :: forall a. Behavior (a -> Boolean) -> Stream a -> Stream a

@@ -8,7 +8,7 @@ exports._filter = H.filter;
 
 exports._split = H.split;
 
-exports._apply = H.apply;
+exports._applyS = H.apply;
 
 exports._filterApply = H.filterApply;
 
