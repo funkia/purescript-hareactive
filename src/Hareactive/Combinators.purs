@@ -20,6 +20,7 @@ module Hareactive.Combinators
   , timeFrom
   , changes
   , toggle
+  , moment
   , performAff
   , runStreamAff
   , runNow
@@ -231,6 +232,8 @@ toggle :: forall a b. Boolean -> Stream a -> Stream b -> Behavior (Behavior Bool
 toggle = runFn3 _toggle
 
 foreign import _toggle :: forall a b. Fn3 Boolean (Stream a) (Stream b) (Behavior (Behavior Boolean))
+
+foreign import moment :: forall b. ((forall a. Behavior a -> a) -> b) -> Behavior b
 
 --------------------------------------------------------------------------------
 -- Now -------------------------------------------------------------------------

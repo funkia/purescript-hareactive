@@ -38,19 +38,21 @@ exports.changes = H.changes;
 
 exports._toggle = H.toggle;
 
+exports.moment = H.moment;
+
 exports._logS = function() {
   return function(name, stream) {
     stream.log(name);
     return stream;
-  }
-}
+  };
+};
 
 exports._logB = function(dict) {
   return function(name, behavior) {
     behavior.map(dict.show).log(name);
     return behavior;
-  }
-}
+  };
+};
 
 // Now
 
@@ -63,8 +65,8 @@ exports.sinkFuture = H.sinkFuture;
 exports._resolveFuture = function(future, value) {
   return function() {
     future.resolve(value);
-  }
-}
+  };
+};
 
 exports._performCb = H.performCb;
 
