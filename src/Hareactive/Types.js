@@ -58,9 +58,4 @@ exports._pureNow = H.Now.of;
 
 exports._bindNow = bind;
 
-exports.liftEffectNow = function(eff) {
-  // This relies on the fact that the function given to `map` is only executed
-  // once the `Now` is being run. This ensures that the eff is only executed
-  // inside another eff (originating in `runNow`).
-  return H.Now.of(undefined).map(function(_) { return eff(); });
-};
+exports.liftEffectNow = H.perform;

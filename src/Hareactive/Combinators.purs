@@ -22,6 +22,8 @@ module Hareactive.Combinators
   , toggle
   , moment
   , performAff
+  , runFutureEffect
+  , runStreamEffect
   , runStreamAff
   , runNow
   ) where
@@ -36,7 +38,7 @@ import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
 import Effect.Class (liftEffect)
 import Effect.Exception (Error)
-import Effect.Uncurried (EffectFn1, EffectFn2, mkEffectFn2, runEffectFn1, runEffectFn2)
+import Effect.Uncurried (EffectFn1, EffectFn2, mkEffectFn1, mkEffectFn2, runEffectFn1, runEffectFn2)
 import Partial.Unsafe (unsafePartial)
 import Hareactive.Types (Behavior, Future, Stream, Now)
 
@@ -263,6 +265,16 @@ performAff aff = do
   liftEffect $ runAff_ (resolveFuture future) aff
   pure future
 
+-- | Takes a future effect and returns a now-computation that runs the effect
+-- | once the future occurs and delivers the result in a future.
+runFutureEffect :: forall a. Future (Effect a) -> Now (Future a)
+runFutureEffect s = runFn2 _performMapFuture (mkEffectFn1 \a -> a) s
+
+-- | Takes a stream of effects and returns a now-computation that runs the
+-- | effect in each occurrence and delivers the result in a stream.
+runStreamEffect :: forall a. Stream (Effect a) -> Now (Stream a)
+runStreamEffect s = runFn2 _performMap (mkEffectFn1 \a -> a) s
+
 runStreamAff :: forall a. Stream (Aff a) -> Now (Stream (Either Error a))
 runStreamAff s = liftEffect $ performCb (flip runAff_) s
 
@@ -276,3 +288,7 @@ runNow :: forall a. Now a -> Effect a
 runNow = runEffectFn1 _runNow
 
 foreign import _runNow :: forall a. EffectFn1 (Now a) a
+
+foreign import _performMap :: forall a b. Fn2 (EffectFn1 a b) (Stream a) (Now (Stream b))
+
+foreign import _performMapFuture :: forall a b. Fn2 (EffectFn1 a b) (Future a) (Now (Future b))

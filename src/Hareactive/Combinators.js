@@ -73,3 +73,7 @@ exports._performCb = H.performCb;
 exports._runNow = function(now) {
   return now.run();
 }
+
+exports._performMap = H.performMap;
+
+exports._performMapFuture = H.performMap;
