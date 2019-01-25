@@ -1,5 +1,6 @@
 module Hareactive.Combinators
   ( applyS
+  , (<~>)
   , filterApply
   , filter
   , filterJust
