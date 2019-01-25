@@ -1,10 +1,10 @@
 # purescript-hareactive
 
-[![Latest release](http://img.shields.io/bower/v/purescript-hareactive.svg)](https://github.com/funkia/purescript-hareactive/releases)
+[![Hareactive on Pursuit](https://pursuit.purescript.org/packages/purescript-hareactive/badge)](https://pursuit.purescript.org/packages/purescript-hareactive)
 [![Build status](https://travis-ci.org/funkia/purescript-hareactive.svg?branch=master)](https://travis-ci.org/funkia/purescript-hareactive)
-[![Documentation](https://img.shields.io/badge/documentation-pursuit-45516b.svg)](http://pursuit.purescript.org/packages/purescript-hareactive)
 
 Hareactive is a higher-order high-performance fully featured FRP library.
+It implements classic FRP with support for continous time.
 Hareactive aims to be practical, powerful and simple.
 
 ## About
