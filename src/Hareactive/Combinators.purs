@@ -276,12 +276,12 @@ runStreamEffect :: forall a. Stream (Effect a) -> Now (Stream a)
 runStreamEffect s = runFn2 _performMap (mkEffectFn1 \a -> a) s
 
 runStreamAff :: forall a. Stream (Aff a) -> Now (Stream (Either Error a))
-runStreamAff s = liftEffect $ performCb (flip runAff_) s
+runStreamAff s = liftEffect $ mapCbStream (flip runAff_) s
 
-performCb :: forall a b. (a -> (b -> Effect Unit) -> Effect Unit) -> Stream a -> Effect (Stream b)
-performCb cb = runEffectFn2 _performCb (mkEffectFn2 (\a resultCb -> cb a (runEffectFn1 resultCb)))
+mapCbStream :: forall a b. (a -> (b -> Effect Unit) -> Effect Unit) -> Stream a -> Effect (Stream b)
+mapCbStream cb = runEffectFn2 _mapCbStream (mkEffectFn2 (\a resultCb -> cb a (runEffectFn1 resultCb)))
 
-foreign import _performCb :: forall a b. EffectFn2 (EffectFn2 a (EffectFn1 b Unit) Unit) (Stream a) (Stream b)
+foreign import _mapCbStream :: forall a b. EffectFn2 (EffectFn2 a (EffectFn1 b Unit) Unit) (Stream a) (Stream b)
 
 -- | Returns an `Effect` that executes the `Now` computation.
 runNow :: forall a. Now a -> Effect a
