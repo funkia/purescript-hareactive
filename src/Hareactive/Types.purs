@@ -9,7 +9,8 @@ import Prelude
 
 import Data.Function.Uncurried (Fn2, runFn2)
 import Effect (Effect)
-import Effect.Class (class MonadEffect)
+import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Uncurried (EffectFn1, runEffectFn1)
 
 -- Types
 
@@ -185,3 +186,20 @@ instance monadEffectNow :: MonadEffect Now where
   liftEffect = liftEffectNow
 
 foreign import liftEffectNow :: forall a. Effect a -> Now a
+
+-- | Run a `Now`-computation in the `Effect` monad.
+runNow :: forall a. Now a -> Effect a
+runNow = runEffectFn1 _runNow
+
+foreign import _runNow :: forall a. EffectFn1 (Now a) a
+
+-- | The `MonadNow` class represents all monads which support running `Now`
+-- | computations.
+-- |
+-- | An instance is provided for all monads that support native effects. That
+-- | is, any monad that implements `MonadEffect`.
+class (Monad m) <= MonadNow m where
+  liftNow :: forall a. Now a -> m a
+
+instance monadNowMonadEffect :: MonadEffect m => MonadNow m where
+  liftNow = liftEffect <<< runNow

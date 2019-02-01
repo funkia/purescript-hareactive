@@ -59,3 +59,5 @@ exports._pureNow = H.Now.of;
 exports._bindNow = bind;
 
 exports.liftEffectNow = H.perform;
+
+exports._runNow = H.runNow;
