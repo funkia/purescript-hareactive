@@ -18,11 +18,9 @@ exports._snapshotWith = H.snapshotWith;
 
 exports._keepWhen = H.keepWhen;
 
-exports._scan = H.scan;
+exports._scanB = H.scan;
 
-exports._stepper = H.stepper;
-
-exports._scanS = H.scanS;
+exports._stepperB = H.stepper;
 
 exports.switchStream = H.switchStream;
 
@@ -32,23 +30,22 @@ exports.timeFrom = H.timeFrom;
 
 exports._switchTo = H.switchTo;
 
-exports._switcher = H.switcher;
+exports._switcherB = H.switcher;
 
 exports.changes = H.changes;
 
-exports._toggle = H.toggle;
+exports._toggleB = H.toggle;
 
 exports.moment = H.moment;
+
+exports.integrateB = H.integrate;
 
 exports._logS = function(name, stream) {
   stream.log(name);
 };
 
-exports._logB = function(dict) {
-  return function(name, behavior) {
-    behavior.map(dict.show).log(name);
-    return behavior;
-  };
+exports._logB = function(name, behavior) {
+  behavior.log(name);
 };
 
 // Now

@@ -12,16 +12,21 @@ module Hareactive.Combinators
   , logS
   , logB
   , scan
-  , scanS
+  , scanB
   , stepper
+  , stepperB
   , switchTo
   , switcher
+  , switcherB
   , switchStream
   , time
   , timeFrom
   , changes
   , toggle
+  , toggleB
   , moment
+  , integrate
+  , integrateB
   , performAff
   , runFutureEffect
   , runStreamEffect
@@ -68,8 +73,6 @@ filterJust = map unsafeFromJust <<< filter isJust
 -- | predicate is satisfied and the seconds stream all occurrences for which the
 -- | predicate is false.
 -- |
--- | Example.
-
 -- | ```purescript
 -- | Tuple smallNumbers largeNumbers = split (_ < 100) streamOfNumbers
 -- | ```
@@ -121,7 +124,15 @@ foreign import _applyS :: forall a b. Fn2 (Behavior (a -> b)) (Stream a) (Stream
 
 infixl 4 apply as <~>
 
--- | A combination of `filter` and `apply`
+-- | A combination of `filter` and `apply`. For each occurrence of the stream
+-- | the predicate at the behavior at that time is applied to the value and the
+-- | returned stream contains the occurrence if and only if the predicate
+-- | returns true.
+-- |
+-- | This function can be seen as a generalization of `filter`. Where `filter`
+-- | takes a constant predicate function `filterApply` takes a varying predicate
+-- | in the form of a behavior of a predicate. As such `filterApply (pure
+-- | predicate) stream` is equivalent to `filter predicate stream`.
 filterApply :: forall a. Behavior (a -> Boolean) -> Stream a -> Stream a
 filterApply = runFn2 _filterApply
 
@@ -141,20 +152,31 @@ foreign import _keepWhen :: forall a. Fn2 (Stream a) (Behavior Boolean) (Stream 
 -- | For each occurrence on the stream the function is applied to the value and
 -- | the accumulator.
 -- |
+scan :: forall a b. (a -> b -> b) -> b -> Stream a -> Now (Behavior b)
+scan f init s = sample $ scanB f init s
+
+-- | Generalization of `scan` satisfying the equation `scan f init s = sample $ scanB f init s`.
+-- |
+-- | Semantically.
 -- | ```purescrept
 -- | scan f a s =
 -- |   \from, to -> foldr f a <<< map (_.a) <<< filter ({time} -> from <= time && to <= endT) $ s
 -- | ```
-scan :: forall a b. (a -> b -> b) -> b -> Stream a -> Behavior (Behavior b)
-scan = runFn3 _scan <<< mkFn2
+scanB :: forall a b. (a -> b -> b) -> b -> Stream a -> Behavior (Behavior b)
+scanB = runFn3 _scanB <<< mkFn2
 
-foreign import _scan :: forall a b. Fn3 (Fn2 a b b) b (Stream a) (Behavior (Behavior b))
+foreign import _scanB :: forall a b. Fn3 (Fn2 a b b) b (Stream a) (Behavior (Behavior b))
 
--- | Similar to `scan` but instead of returning a behavior it returns a stream.
-scanS :: forall a b. (a -> b -> b) -> b -> Stream a -> Behavior (Stream b)
-scanS = runFn3 _scanS <<< mkFn2
+-- | Creates a behavior whose value is the last occurrence in the stream.
+stepper :: forall a. a -> Stream a -> Now (Behavior a)
+stepper init s = sample $ stepperB init s
 
-foreign import _scanS :: forall a b. Fn3 (Fn2 a b b) b (Stream a) (Behavior (Stream b))
+-- | Generalization of `stepper` satisfying `stepper init s = sample $ stepperB
+-- | init s`.
+stepperB :: forall a. a -> Stream a -> Behavior (Behavior a)
+stepperB = runFn2 _stepperB
+
+foreign import _stepperB :: forall a. Fn2 a (Stream a) (Behavior (Behavior a))
 
 -- | Creates a stream that occurs exactly when the given stream occurs. Every
 -- | time the stream s has an occurrence the current value of the behavior is
@@ -174,12 +196,6 @@ snapshotWith f b a = runFn3 _snapshotWith (mkFn2 f) b a
 
 foreign import _snapshotWith :: forall a b c. Fn3 (Fn2 a b c) (Behavior b) (Stream a) (Stream c)
 
--- | Creates a behavior whose value is the last occurrence in the stream.
-stepper :: forall a. a -> Stream a -> Behavior (Behavior a)
-stepper = runFn2 _stepper
-
-foreign import _stepper :: forall a. Fn2 a (Stream a) (Behavior (Behavior a))
-
 -- | Creates a new behavior that acts exactly like the first behavior until the
 -- | future occurs after which it acts like the behavior from the future.
 switchTo :: forall a. Behavior a -> Future (Behavior a) -> Behavior a
@@ -189,10 +205,17 @@ foreign import _switchTo :: forall a. Fn2 (Behavior a) (Future (Behavior a)) (Be
 
 -- | Creates a behavior that initially acts like the first behavior and then
 -- | switches to each new behavior from the stream.
-switcher :: forall a. Behavior a -> Stream (Behavior a) -> Behavior (Behavior a)
-switcher = runFn2 _switcher
+-- |
+-- | This function is equal to `switcherB >>> sample`
+switcher :: forall a. Behavior a -> Stream (Behavior a) -> Now (Behavior a)
+switcher b s = sample $ switcherB b s
 
-foreign import _switcher :: forall a. Fn2 (Behavior a) (Stream (Behavior a)) (Behavior (Behavior a))
+-- | Creates a behavior that initially acts like the first behavior and then
+-- | switches to each new behavior from the stream.
+switcherB :: forall a. Behavior a -> Stream (Behavior a) -> Behavior (Behavior a)
+switcherB = runFn2 _switcherB
+
+foreign import _switcherB :: forall a. Fn2 (Behavior a) (Stream (Behavior a)) (Behavior (Behavior a))
 
 -- | Takes a stream valued behavior and returns a stream that emits values from
 -- | the current stream at the behavior. I.e. the returned stream always
@@ -230,12 +253,29 @@ foreign import changes :: forall a. Behavior a -> Stream a
 -- | ```purescript
 -- | isDoorOpen <- sample $ toggle false doorOpen doorClose
 -- | ```
-toggle :: forall a b. Boolean -> Stream a -> Stream b -> Behavior (Behavior Boolean)
-toggle = runFn3 _toggle
+toggle :: forall a b. Boolean -> Stream a -> Stream b -> Now (Behavior Boolean)
+toggle initial on off = sample $ toggleB initial on off
 
-foreign import _toggle :: forall a b. Fn3 Boolean (Stream a) (Stream b) (Behavior (Behavior Boolean))
+-- | Generalization of `toggle` satisfying `toggle initial on off = sample $
+-- | toggleB initial on off`.
+toggleB :: forall a b. Boolean -> Stream a -> Stream b -> Behavior (Behavior Boolean)
+toggleB = runFn3 _toggleB
+
+foreign import _toggleB :: forall a b. Fn3 Boolean (Stream a) (Stream b) (Behavior (Behavior Boolean))
 
 foreign import moment :: forall b. ((forall a. Behavior a -> a) -> b) -> Behavior b
+
+-- | Integrate behavior with respect to time. The value of the given behavior is
+-- | interpreted as being a rate of change _per second_.
+-- |
+-- | Note that `integrate` is implemented using Euler's method. Hence the
+-- | resulting behavior is not exact but includes some numerical error.
+integrate :: Behavior Number -> Now (Behavior Number)
+integrate = sample <<< integrateB
+
+-- | Generalization of `integrate` satisfying `integrate = sample <<<
+-- | integrateB`.
+foreign import integrateB :: Behavior Number -> Behavior (Behavior Number)
 
 --------------------------------------------------------------------------------
 -- Now -------------------------------------------------------------------------
