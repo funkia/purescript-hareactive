@@ -40,11 +40,8 @@ exports._toggle = H.toggle;
 
 exports.moment = H.moment;
 
-exports._logS = function() {
-  return function(name, stream) {
-    stream.log(name);
-    return stream;
-  };
+exports._logS = function(name, stream) {
+  stream.log(name);
 };
 
 exports._logB = function(dict) {

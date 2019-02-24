@@ -78,16 +78,15 @@ split predicate stream = unsafePartial (let [x, y] = runFn2 _split predicate str
 
 foreign import _split :: forall a. Fn2 (a -> Boolean) (Stream a) (Array (Stream a))
 
-logS :: forall a. Show a => String -> Stream a -> Stream a
-logS name stream = stream
-  where _ = runFn2 _logS name $ map show stream
+logS :: forall a. String -> Stream a -> Effect Unit
+logS = runEffectFn2 _logS
 
-foreign import _logS :: forall a. Show a => Fn2 String (Stream a) (Stream a)
+foreign import _logS :: forall a. EffectFn2 String (Stream a) Unit
 
-logB :: forall a. Show a => String -> Behavior a -> Behavior a
-logB name = runFn2 _logB name
+logB :: forall a. String -> Behavior a -> Effect Unit
+logB = runEffectFn2 _logB
 
-foreign import _logB :: forall a. Show a => Fn2 String (Behavior a) (Behavior a)
+foreign import _logB :: forall a. EffectFn2 String (Behavior a) Unit
 
 --------------------------------------------------------------------------------
 -- Behavior and stream ---------------------------------------------------------
