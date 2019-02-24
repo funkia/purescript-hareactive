@@ -13,6 +13,8 @@ module Hareactive.Combinators
   , logB
   , scan
   , scanB
+  , scanS
+  , scanSB
   , stepper
   , stepperB
   , switchTo
@@ -166,6 +168,17 @@ scanB :: forall a b. (a -> b -> b) -> b -> Stream a -> Behavior (Behavior b)
 scanB = runFn3 _scanB <<< mkFn2
 
 foreign import _scanB :: forall a b. Fn3 (Fn2 a b b) b (Stream a) (Behavior (Behavior b))
+
+-- | Similar to `scan` but instead of returning a behavior it returns a stream.
+-- |
+scanS :: forall a b. (a -> b -> b) -> b -> Stream a -> Now (Stream b)
+scanS f init s = sample $ scanSB f init s
+
+-- | Generalization of `scanS` satisfying the equation `scanS f init s = sample $ scanSB f init s`.
+scanSB :: forall a b. (a -> b -> b) -> b -> Stream a -> Behavior (Stream b)
+scanSB = runFn3 _scanSB <<< mkFn2
+
+foreign import _scanSB :: forall a b. Fn3 (Fn2 a b b) b (Stream a) (Behavior (Stream b))
 
 -- | Creates a behavior whose value is the last occurrence in the stream.
 stepper :: forall a. a -> Stream a -> Now (Behavior a)
