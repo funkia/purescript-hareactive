@@ -20,7 +20,7 @@ exports._keepWhen = H.keepWhen;
 
 exports._scanB = H.scan;
 
-exports._scanSB = H.scan;
+exports._scanSB = H.scanS;
 
 exports._stepperB = H.stepper;
 
