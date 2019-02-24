@@ -32,7 +32,7 @@ exports._switchTo = H.switchTo;
 
 exports._switcherB = H.switcher;
 
-exports.changes = H.changes;
+exports._changes = H.changes;
 
 exports._toggleB = H.toggle;
 

@@ -238,7 +238,10 @@ foreign import timeFrom :: Behavior (Behavior Number)
 
 -- | Takes a behavior and returns a stream that has an occurrence
 -- | whenever the behavior changes.
-foreign import changes :: forall a. Behavior a -> Stream a
+changes :: forall a. Eq a => Behavior a -> Stream a
+changes b = runFn2 _changes b (mkFn2 (==))
+
+foreign import _changes :: forall a. Fn2 (Behavior a) (Fn2 a a Boolean) (Stream a)
 
 -- | Creates a behavior that switches between `true` and `false`. Initally it
 -- | takes the value of its first argument. Each occurrence of the first stream
