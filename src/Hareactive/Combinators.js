@@ -16,15 +16,17 @@ exports._snapshot = H.snapshot;
 
 exports._snapshotWith = H.snapshotWith;
 
+exports.selfie = H.selfie;
+
 exports._keepWhen = H.keepWhen;
 
-exports._scanB = H.scan;
+exports._accumFrom = H.accumFrom;
 
-exports._scanSB = H.scanS;
+exports._scanFrom = H.scanFrom;
 
-exports._stepperB = H.stepper;
+exports._stepperFrom = H.stepperFrom;
 
-exports.switchStream = H.switchStream;
+exports.shiftCurrent = H.shiftCurrent;
 
 exports.time = H.time;
 
@@ -32,15 +34,15 @@ exports.timeFrom = H.timeFrom;
 
 exports._switchTo = H.switchTo;
 
-exports._switcherB = H.switcher;
+exports._switcherFrom = H.switcherFrom;
 
 exports._changes = H.changes;
 
-exports._toggleB = H.toggle;
+exports._toggleFrom = H.toggleFrom;
 
 exports.moment = H.moment;
 
-exports.integrateB = H.integrate;
+exports.integrateFrom = H.integrateFrom;
 
 exports._logS = function(name, stream) {
   stream.log(name);
