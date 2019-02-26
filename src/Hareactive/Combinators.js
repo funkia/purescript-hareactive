@@ -24,9 +24,13 @@ exports._accumFrom = H.accumFrom;
 
 exports._scanFrom = H.scanFrom;
 
+exports._stepTo = H.stepTo;
+
 exports._stepperFrom = H.stepperFrom;
 
 exports.shiftCurrent = H.shiftCurrent;
+
+exports.shiftFrom = H.shiftFrom;
 
 exports.time = H.time;
 
@@ -41,6 +45,8 @@ exports._changes = H.changes;
 exports._toggleFrom = H.toggleFrom;
 
 exports.moment = H.moment;
+
+exports.nextOccurrenceFrom = H.nextOccurrenceFrom;
 
 exports.integrateFrom = H.integrateFrom;
 

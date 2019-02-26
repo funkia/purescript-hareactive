@@ -14,18 +14,23 @@ module Hareactive.Combinators
   , accumFrom
   , scan
   , scanFrom
+  , stepTo
   , stepper
   , stepperFrom
   , switchTo
   , switcher
   , switcherFrom
   , shiftCurrent
+  , shift
+  , shiftFrom
   , time
   , timeFrom
   , changes
   , toggle
   , toggleFrom
   , moment
+  , nextOccurrence
+  , nextOccurrenceFrom
   , integrate
   , integrateFrom
   , logS
@@ -84,11 +89,13 @@ split predicate stream = unsafePartial (let [x, y] = runFn2 _split predicate str
 
 foreign import _split :: forall a. Fn2 (a -> Boolean) (Stream a) (Array (Stream a))
 
+-- | `console.log`s the value of every occurrence.
 logS :: forall a. String -> Stream a -> Effect Unit
 logS = runEffectFn2 _logS
 
 foreign import _logS :: forall a. EffectFn2 String (Stream a) Unit
 
+-- | `console.log`s the value of the behavior whenever it changes.
 logB :: forall a. String -> Behavior a -> Effect Unit
 logB = runEffectFn2 _logB
 
@@ -192,6 +199,14 @@ stepperFrom = runFn2 _stepperFrom
 
 foreign import _stepperFrom :: forall a. Fn2 a (Stream a) (Behavior (Behavior a))
 
+-- | From an initial value and a future value, `stepTo` creates a new behavior
+-- | that has the initial value until `next` occurs, after which it has the
+-- | value of the future.
+stepTo :: forall a. a -> Future a -> Behavior a
+stepTo = runFn2 _stepTo
+
+foreign import _stepTo :: forall a. Fn2 a (Future a) (Behavior a)
+
 -- | Creates a stream that occurs exactly when the given stream occurs. Every
 -- | time the stream s has an occurrence the current value of the behavior is
 -- | sampled. The value in the occurrence is then replaced with the sampled
@@ -239,6 +254,15 @@ foreign import _switcherFrom :: forall a. Fn2 (Behavior a) (Stream (Behavior a))
 -- | "shifts" to the current stream at the behavior.
 foreign import shiftCurrent :: forall a. Behavior (Stream a) -> Stream a
 
+-- | Takes a stream of a stream and returns a stream that emits from the last
+-- | stream.
+shift :: forall a. Stream (Stream a) -> Now (Stream a)
+shift = sample <<< shiftFrom
+
+-- | Takes a stream of a stream and returns a stream that emits from the last
+-- | stream.
+foreign import shiftFrom :: forall a. Stream (Stream a) -> Behavior (Stream a)
+
 -- | A behavior whose value is the number of milliseconds elapsed since UNIX
 -- | epoch.
 foreign import time :: Behavior Number
@@ -284,6 +308,13 @@ toggleFrom = runFn3 _toggleFrom
 foreign import _toggleFrom :: forall a b. Fn3 Boolean (Stream a) (Stream b) (Behavior (Behavior Boolean))
 
 foreign import moment :: forall b. ((forall a. Behavior a -> a) -> b) -> Behavior b
+
+-- | Returns the next occurrence at the stream as a future.
+nextOccurrence :: forall a. Stream a -> Now (Future a)
+nextOccurrence = sample <<< nextOccurrenceFrom
+
+-- | Returns the next occurrence at the stream as a future.
+foreign import nextOccurrenceFrom :: forall a. Stream a -> Behavior (Future a)
 
 -- | Integrate behavior with respect to time. The value of the given behavior is
 -- | interpreted as being a rate of change _per second_.
