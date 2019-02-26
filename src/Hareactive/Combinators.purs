@@ -1,3 +1,50 @@
+-- | This module contains all the combinators in Hareactive.
+-- |
+-- | The lists below contains convenient grouping of various functions.
+-- |
+-- | #### Accumulating state
+-- |
+-- | [`accum     :: (a -> b -> b) -> b -> Stream a -> Now (Behavior b)`](#v:accum)  
+-- | [`scan      :: (a -> b -> b) -> b -> Stream a -> Now (Stream   b)`](#v:scan)  
+-- | [`integrate :: Behavior Number -> Now (Behavior Number)`](#v:integrate)  
+-- |
+-- | #### Stepping and switching
+-- |
+-- | The term "switch" refers to a behavior that changes between one or more
+-- | behaviors. The term "step" refers to a behavior changes between
+-- | constants. In other words, "switch" is a generalization of "step" that one
+-- | arrives at by replacing `a` with `Behavior a`.
+-- |
+-- | [`stepTo   ::          a -> Future           a  ->      Behavior a`](#v:stepTo)  
+-- | [`switchTo :: Behavior a -> Future (Behavior a) ->      Behavior a`](#v:switchTo)  
+-- | [`stepper  ::          a -> Stream           a  -> Now (Behavior a)`](#v:stepper)  
+-- | [`switcher :: Behavior a -> Stream (Behavior a) -> Now (Behavior a)`](#v:switcher)  
+-- |
+-- | #### Shifts
+-- |
+-- | The term "shift" refers to creating a stream that changes between one or
+-- | more streams.
+-- |
+-- | * `shiftCurrent :: Behavior (Stream a) ->      Stream a`
+-- | * `shift        :: Stream   (Stream a) -> Now (Stream a)`
+-- |
+-- | #### Converting between reactive values
+-- |
+-- | * From `Behavior` to `Stream`: [changes](#v:changes).
+-- | * From `Future` to `Behavior`: [stepTo](#v:stepTo).
+-- | * From `Stream` to `Behavior`: [accum](#v:accum), [stepper](#v:stepper).
+-- | * From `Stream` to `Future`: [nextOccurrence](#v:nextOccurrence).
+-- |
+-- | #### Flattening nested reactive values.
+-- |
+-- | * `Behavior (         a)`: [sample](#v:sample), [moment](#v:sample)
+-- | * `Behavior (Behavior a)`: `join`
+-- | * `Behavior (Stream   a)`: [shiftCurrent](#v:shiftCurrent)
+-- | * `Stream   (Stream   a)`: [shift](#v:shift)
+-- | * `Stream   (Behavior a)`: [switcherFrom](#v:switcherFrom), [selfie](#v:selfie)
+-- | * `Future   (Behavior a)`: [switchTo](#v:switchTo)
+-- | * `Future   (Future   a)`: `join`
+
 module Hareactive.Combinators
   ( applyS
   , (<~>)
