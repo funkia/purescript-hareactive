@@ -5,9 +5,18 @@ module Hareactive.Interop
   ) where
 
 import Effect (Effect)
-import Effect.Uncurried (EffectFn1, EffectFn2, mkEffectFn1, runEffectFn2)
+import Effect.Uncurried (EffectFn1, EffectFn2, mkEffectFn1, runEffectFn1, runEffectFn2)
 import Hareactive.Types (Behavior, Stream)
 import Prelude (Unit, (<<<))
+
+type PushCallback a = a -> Effect Unit
+
+type ProducerFunction a = PushCallback a -> Effect (Effect Unit)
+
+producerStream :: forall a. ProducerFunction a -> Stream a
+producerStream f = _producerStream (mkEffectFn1 (\cb -> f (runEffectFn1 cb)))
+
+foreign import _producerStream :: forall a. (EffectFn1 (EffectFn1 a Unit) (Effect Unit)) -> Stream a
 
 -- Executes the side-effect for each occurrence of the stream.
 subscribe :: forall a. (a -> Effect Unit) -> Stream a -> Effect Unit
