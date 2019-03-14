@@ -12,8 +12,12 @@ exports.sinkStreamToStream = function(sinkStream) {
   return sinkStream;
 }
 
+exports._fromFunction = H.fromFunction;
+
+exports._producerBehavior = H.producerBehaviorFromFunction;
+
 exports._subscribe = function(cb, stream) {
   stream.subscribe(cb);
 }
 
-exports._fromFunction = H.fromFunction;
+exports._observe = H.observe;
