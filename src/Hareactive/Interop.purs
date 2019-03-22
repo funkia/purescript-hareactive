@@ -3,6 +3,7 @@
 module Hareactive.Interop
   ( subscribe
   , producerStream
+  , Clock
   , producerBehavior
   , SinkStream
   , sinkStream
