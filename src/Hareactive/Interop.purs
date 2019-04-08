@@ -1,4 +1,5 @@
--- | This module contains functions for hooking up FRP wtih the outside world.
+-- | This module contains functions for connecting FRP wtih the outside world.
+-- | It low-level functions for creating and for consuming reactives.
 
 module Hareactive.Interop
   ( subscribe
@@ -10,6 +11,12 @@ module Hareactive.Interop
   , sinkStream'
   , sinkStreamToStream
   , pushSink
+  , MutableBehavior
+  , mutableBehavior
+  , mutableBehavior'
+  , mutableBehaviorToBehavior
+  , writerBehavior
+  , readBehavior
   , observe
   ) where
 
@@ -42,8 +49,8 @@ foreign import data SinkStream :: Type -> Type
 -- | [`pushSink`](#v:pushSink) function.
 foreign import sinkStream :: forall a. Effect (SinkStream a)
 
--- | This is convenience function for the common use-case of calling
--- | `sinkStream` and then also converting the `SinkStream` into a `Stream`
+-- | This is a convenience function for the common use-case of calling
+-- | `sinkStream` and then converting the `SinkStream` into a `Stream`
 -- | with `sinkStreamToStream`.
 -- |
 -- | The code
@@ -65,6 +72,39 @@ pushSink = runEffectFn2 _pushSink
 foreign import _pushSink :: forall a. EffectFn2 a (SinkStream a) Unit
 
 foreign import sinkStreamToStream :: SinkStream ~> Stream
+
+foreign import data SinkBehavior :: Type -> Type
+
+-- | An effectful computation that creates a `MutableBehavior`. A
+-- | `MutableBehavior` is a behavior that one can imperatively change the value
+-- | of by using the [`writerBehavior`](#v:writerBehavior) function.
+foreign import mutableBehavior :: forall a. Effect (MutableBehavior a)
+
+-- | This is convenience function for the common use-case of calling
+-- | `mutableBehavior` and then also converting the `MutableBehavior` into a `Behavior`
+-- | with `mutableBehaviorToBehavior`.
+-- |
+-- | The code
+-- | ```purescript
+-- | mutable <- mutableBehavior
+-- | stream <- mutableBehaviorToBehavior mutable
+-- | ```
+-- |
+-- | Is equivalent to
+-- | ```purescript
+-- | Tuple mutable stream <- mutableBehavior'
+-- | ```
+mutableBehavior' :: forall a. Effect (Tuple (MutableBehavior a) (Behavior a))
+mutableBehavior' = (\mutable -> Tuple mutable (mutableBehaviorToBehavior mutable)) <$> mutableBehavior
+
+writerBehavior :: forall a. a -> MutableBehavior a -> Effect Unit
+writerBehavior = runEffectFn2 _writerBehavior
+
+foreign import _writerBehavior :: forall a. EffectFn2 a (MutableBehavior a) Unit
+
+foreign import mutableBehaviorToBehavior :: MutableBehavior ~> Behavior
+
+foreign import readBehavior :: forall a. Behavior a -> Effect a
 
 -- | Creates a behavior from an effectful function.
 -- |

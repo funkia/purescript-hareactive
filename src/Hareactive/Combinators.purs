@@ -4,9 +4,9 @@
 -- |
 -- | #### Accumulating state
 -- |
--- | [`accum     :: (a -> b -> b) -> b -> Stream a -> Now (Behavior b)`](#v:accum)  
--- | [`scan      :: (a -> b -> b) -> b -> Stream a -> Now (Stream   b)`](#v:scan)  
--- | [`integrate :: Behavior Number -> Now (Behavior Number)`](#v:integrate)  
+-- | [`accum     :: (a -> b -> b) -> b -> Stream a -> Now (Behavior b)`](#v:accum)
+-- | [`scan      :: (a -> b -> b) -> b -> Stream a -> Now (Stream   b)`](#v:scan)
+-- | [`integrate :: Behavior Number -> Now (Behavior Number)`](#v:integrate)
 -- |
 -- | #### Stepping and switching
 -- |
@@ -15,10 +15,10 @@
 -- | constants. In other words, "switch" is a generalization of "step" that one
 -- | arrives at by replacing `a` with `Behavior a`.
 -- |
--- | [`stepTo   ::          a -> Future           a  ->      Behavior a`](#v:stepTo)  
--- | [`switchTo :: Behavior a -> Future (Behavior a) ->      Behavior a`](#v:switchTo)  
--- | [`stepper  ::          a -> Stream           a  -> Now (Behavior a)`](#v:stepper)  
--- | [`switcher :: Behavior a -> Stream (Behavior a) -> Now (Behavior a)`](#v:switcher)  
+-- | [`stepTo   ::          a -> Future           a  ->      Behavior a`](#v:stepTo)
+-- | [`switchTo :: Behavior a -> Future (Behavior a) ->      Behavior a`](#v:switchTo)
+-- | [`stepper  ::          a -> Stream           a  -> Now (Behavior a)`](#v:stepper)
+-- | [`switcher :: Behavior a -> Stream (Behavior a) -> Now (Behavior a)`](#v:switcher)
 -- |
 -- | #### Shifts
 -- |
