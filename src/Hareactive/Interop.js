@@ -1,5 +1,9 @@
 const H = require("@funkia/hareactive");
 
+function id(a) {
+  return a
+}
+
 exports._producerStream = H.producerStream;
 
 exports.sinkStream = H.sinkStream;
@@ -8,17 +12,7 @@ exports._pushSink = function(a, sinkStream) {
   sinkStream.push(a);
 }
 
-exports._writerBehavior = function(a, behavior) {
-  behavior.push(a);
-}
-
-exports.sinkStreamToStream = function(sinkStream) {
-  return sinkStream;
-}
-
-exports.readBehavior = function(b) {
-  return b.at();
-}
+exports.sinkStreamToStream = id;
 
 exports._fromFunction = H.fromFunction;
 
