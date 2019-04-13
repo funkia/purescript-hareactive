@@ -6,7 +6,7 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Ref as Ref
-import Hareactive.Interop (pushSink, sinkStream', sinkStreamToStream, subscribe)
+import Hareactive.Interop (pushSink, sinkStream', subscribe)
 import Test.Spec (describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Test.Spec.Reporter.Console (consoleReporter)
@@ -28,3 +28,14 @@ main = run [consoleReporter] do
       result <- liftEffect $ Ref.read n
       result `shouldEqual` 10
       pure unit
+    describe "observe" do
+      {-- it "can observe sink" do --}
+      {--   n <- liftEffect $ Ref.new 0 --}
+      {--   Tuple sink stream <- liftEffect $ sinkStream' --}
+      {--   liftEffect $ observe (_ `addRef` n) (\_ -> pure unit) stream --}
+      {--   liftEffect $ pushSink 3 sink --}
+      {--   liftEffect $ pushSink 2 sink --}
+      {--   liftEffect $ pushSink 5 sink --}
+      {--   result <- liftEffect $ Ref.read n --}
+      {--   result `shouldEqual` 10 --}
+

@@ -16,9 +16,9 @@
     "purescript-console": "^4.2.0",
     "purescript-functions": "^4.0.0",
     "purescript-maybe": "^4.0.1",
-    "purescript-partial": "^2.0.0",
-    "purescript-effect": "^2.0.0",
-    "purescript-aff": "^5.1.0",
+    "purescript-partial": "^2.0.1",
+    "purescript-effect": "^2.0.1",
+    "purescript-aff": "^5.1.1",
     "purescript-tuples": "^5.1.0"
   },
   "devDependencies": {
