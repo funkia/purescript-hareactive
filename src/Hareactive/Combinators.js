@@ -74,6 +74,8 @@ exports._resolveFuture = function(future, value) {
 
 exports._mapCbStream = H.mapCbStream;
 
+exports.loopNow = H.loopNow;
+
 exports._runNow = function(now) {
   return now.run();
 }

@@ -86,6 +86,7 @@ module Hareactive.Combinators
   , runFutureEffect
   , runStreamEffect
   , runStreamAff
+  , loopNow
   , runNow
   ) where
 
@@ -420,6 +421,26 @@ mapCbStream :: forall a b. (a -> (b -> Effect Unit) -> Effect Unit) -> Stream a 
 mapCbStream cb = runEffectFn2 _mapCbStream (mkEffectFn2 (\a resultCb -> cb a (runEffectFn1 resultCb)))
 
 foreign import _mapCbStream :: forall a b. EffectFn2 (EffectFn2 a (EffectFn1 b Unit) Unit) (Stream a) (Stream b)
+
+-- | Creates a `Now`-computation that can depend recursively on its own.
+-- |
+-- | The type variable `a` must be a record consisting of only `Future`,
+-- | `Stream`, or `Behavior` values. This constraint is not, yet, enforced at
+-- | the type level.
+-- |
+-- | The `counter` function in the following contrieved example returns a
+-- | behavior. Whenever the given stream has an occurrence the counter is
+-- | increased by adding its current value to a snapshot of its current value.
+-- |
+-- | ```purescript
+-- | counter :: forall a. Stream a -> Stream Integer
+-- | counter stream = loopNow f
+-- |   where f { count } = do
+-- |     let countS = snapshot count stream
+-- |     count <- accum (+) 1 countS
+-- |     pure { count }
+---| ```
+foreign import loopNow :: forall a. (a -> Now a) -> Now a
 
 -- | Returns an `Effect` that executes the `Now` computation.
 runNow :: forall a. Now a -> Effect a
