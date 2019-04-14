@@ -82,7 +82,7 @@ module Hareactive.Combinators
   , integrateFrom
   , logS
   , logB
-  , performAff
+  , runAffNow
   , runFutureEffect
   , runStreamEffect
   , runStreamAff
@@ -396,10 +396,9 @@ resolveFuture = runFn2 _resolveFuture
 
 foreign import _resolveFuture :: forall a. Fn2 (Future a) a (Effect Unit)
 
--- | Takes a stream of `Aff` and runs each side-effect. The returned stream has
--- | an occurrence for the result from each asynchronous computation.
-performAff :: forall a. Aff a -> Now (Future (Either Error a))
-performAff aff = do
+-- | Runs an `Aff` inside a `Now`-computation.
+runAffNow :: forall a. Aff a -> Now (Future (Either Error a))
+runAffNow aff = do
   future <- liftEffect sinkFuture
   liftEffect $ runAff_ (resolveFuture future) aff
   pure future
@@ -414,6 +413,8 @@ runFutureEffect s = runFn2 _performMapFuture (mkEffectFn1 \a -> a) s
 runStreamEffect :: forall a. Stream (Effect a) -> Now (Stream a)
 runStreamEffect s = runFn2 _performMap (mkEffectFn1 \a -> a) s
 
+-- | Takes a stream of `Aff` and runs each side-effect. The returned stream has
+-- | an occurrence for the result from each asynchronous computation.
 runStreamAff :: forall a. Stream (Aff a) -> Now (Stream (Either Error a))
 runStreamAff s = liftEffect $ mapCbStream (flip runAff_) s
 
