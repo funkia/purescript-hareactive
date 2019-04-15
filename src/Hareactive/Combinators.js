@@ -64,14 +64,6 @@ exports.sample = H.sample;
 
 exports.plan = H.plan;
 
-exports.sinkFuture = H.sinkFuture;
-
-exports._resolveFuture = function(future, value) {
-  return function() {
-    future.resolve(value);
-  };
-};
-
 exports._mapCbStream = H.mapCbStream;
 
 exports.loopNow = H.loopNow;

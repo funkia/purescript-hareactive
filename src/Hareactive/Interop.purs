@@ -5,6 +5,11 @@ module Hareactive.Interop
   ( subscribe
   , producerStream
   , Clock
+  , SinkFuture
+  , sinkFuture
+  , sinkFuture'
+  , resolveFuture
+  , sinkFutureToFuture
   , producerBehavior
   , SinkStream
   , sinkStream
@@ -18,13 +23,29 @@ import Data.Function.Uncurried (Fn2, runFn2)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Uncurried (EffectFn1, EffectFn2, EffectFn3, mkEffectFn1, runEffectFn1, runEffectFn2, runEffectFn3)
-import Hareactive.Types (Behavior, Stream)
+import Hareactive.Types (Behavior, Future, Stream)
 import Prelude (type (~>), Unit, (<$>), (<<<))
 
 -- | Hareactive represents time internally by using a logical clock. This type represents logical timestamps.
 -- |
 -- | This type is opaque to users of Hareactive.
 foreign import data Clock :: Type
+
+foreign import data SinkFuture :: Type -> Type
+
+-- | Creates a future that one can resolve imperatively by calling
+-- | `resolveFuture`.
+foreign import sinkFuture :: forall a. Effect (SinkFuture a)
+
+sinkFuture' :: forall a. Effect { sink :: SinkFuture a, future :: Future a }
+sinkFuture' = (\sink -> { sink, future: sinkFutureToFuture sink }) <$> sinkFuture
+
+resolveFuture :: forall a. SinkFuture a -> a -> Effect Unit
+resolveFuture = runFn2 _resolveFuture
+
+foreign import _resolveFuture :: forall a. Fn2 (SinkFuture a) a (Effect Unit)
+
+foreign import sinkFutureToFuture :: SinkFuture ~> Future
 
 type PushCallback a = a -> Effect Unit
 
@@ -66,8 +87,6 @@ pushSink = runEffectFn2 _pushSink
 foreign import _pushSink :: forall a. EffectFn2 a (SinkStream a) Unit
 
 foreign import sinkStreamToStream :: SinkStream ~> Stream
-
-foreign import data SinkBehavior :: Type -> Type
 
 -- | Creates a behavior from an effectful function.
 -- |

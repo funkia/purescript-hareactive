@@ -4,6 +4,16 @@ function id(a) {
   return a
 }
 
+exports.sinkFuture = H.sinkFuture;
+
+exports._resolveFuture = function(future, value) {
+  return function() {
+    future.resolve(value);
+  };
+};
+
+exports.sinkFutureToFuture = id;
+
 exports._producerStream = H.producerStream;
 
 exports.sinkStream = H.sinkStream;

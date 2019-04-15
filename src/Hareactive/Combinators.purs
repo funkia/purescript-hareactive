@@ -101,8 +101,9 @@ import Effect.Aff (Aff, runAff_)
 import Effect.Class (liftEffect)
 import Effect.Exception (Error)
 import Effect.Uncurried (EffectFn1, EffectFn2, mkEffectFn1, mkEffectFn2, runEffectFn1, runEffectFn2)
-import Partial.Unsafe (unsafePartial)
+import Hareactive.Interop (resolveFuture, sinkFuture')
 import Hareactive.Types (Behavior, Future, Stream, Now)
+import Partial.Unsafe (unsafePartial)
 
 -- | Filter a stream, keeping the elements which satisfy a predicate function,
 -- | creating a new stream.
@@ -389,18 +390,11 @@ foreign import sample :: forall a. Behavior a -> Now a
 -- | moment that it is running in.
 foreign import plan :: forall a. Future (Now a) -> Now (Future a)
 
-foreign import sinkFuture :: forall a. Effect (Future a)
-
-resolveFuture :: forall a. Future a -> a -> Effect Unit
-resolveFuture = runFn2 _resolveFuture
-
-foreign import _resolveFuture :: forall a. Fn2 (Future a) a (Effect Unit)
-
 -- | Runs an `Aff` inside a `Now`-computation.
 runAffNow :: forall a. Aff a -> Now (Future (Either Error a))
 runAffNow aff = do
-  future <- liftEffect sinkFuture
-  liftEffect $ runAff_ (resolveFuture future) aff
+  { future, sink } <- liftEffect sinkFuture'
+  liftEffect $ runAff_ (resolveFuture sink) aff
   pure future
 
 -- | Takes a future effect and returns a now-computation that runs the effect
