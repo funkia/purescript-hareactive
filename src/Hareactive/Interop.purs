@@ -1,8 +1,10 @@
--- | This module contains functions for connecting FRP wtih the outside world.
--- | It low-level functions for creating and for consuming reactives.
+-- | This module contains functions for connecting FRP with the rest of the
+-- | world. It contains low-level functions for creating and for consuming
+-- | reactives.
 
 module Hareactive.Interop
   ( subscribe
+  , ProducerFunction
   , producerStream
   , Clock
   , SinkFuture
@@ -20,7 +22,6 @@ module Hareactive.Interop
   ) where
 
 import Data.Function.Uncurried (Fn2, runFn2)
-import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Uncurried (EffectFn1, EffectFn2, EffectFn3, mkEffectFn1, runEffectFn1, runEffectFn2, runEffectFn3)
 import Hareactive.Types (Behavior, Future, Stream)
@@ -47,9 +48,9 @@ foreign import _resolveFuture :: forall a. Fn2 (SinkFuture a) a (Effect Unit)
 
 foreign import sinkFutureToFuture :: SinkFuture ~> Future
 
-type PushCallback a = a -> Effect Unit
-
-type ProducerFunction a = PushCallback a -> Effect (Effect Unit)
+-- | A `ProducerFunction` produces values by repeatedly invoking its first
+-- | argument with new values.
+type ProducerFunction a = (a -> Effect Unit) -> Effect (Effect Unit)
 
 -- Create a stream from an effectful function.
 producerStream :: forall a. ProducerFunction a -> Stream a
@@ -76,16 +77,18 @@ foreign import sinkStream :: forall a. Effect (SinkStream a)
 -- |
 -- | Is equivalent to
 -- | ```purescript
--- | Tuple sink stream <- sinkStream'
+-- | { sink, stream } <- sinkStream'
 -- | ```
-sinkStream' :: forall a. Effect (Tuple (SinkStream a) (Stream a))
-sinkStream' = (\sink -> Tuple sink (sinkStreamToStream sink)) <$> sinkStream
+sinkStream' :: forall a. Effect { sink :: SinkStream a, stream :: Stream a }
+sinkStream' = (\sink -> { sink, stream: sinkStreamToStream sink }) <$> sinkStream
 
 pushSink :: forall a. a -> SinkStream a -> Effect Unit
 pushSink = runEffectFn2 _pushSink
 
 foreign import _pushSink :: forall a. EffectFn2 a (SinkStream a) Unit
 
+-- | Extract a `Stream` from a `SinkStream`. The resulting stream has an
+-- | occurrence every time the `SinkStream` gets pushed into.
 foreign import sinkStreamToStream :: SinkStream ~> Stream
 
 -- | Creates a behavior from an effectful function.

@@ -2,7 +2,6 @@ module Test.Main where
 
 import Prelude
 
-import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Ref as Ref
@@ -21,7 +20,7 @@ main = run [consoleReporter] do
   describe "hareactive" do
     it "sink and subscribe works" do
       n <- liftEffect $ Ref.new 0
-      Tuple sink stream <- liftEffect $ sinkStream'
+      { sink, stream } <- liftEffect $ sinkStream'
       liftEffect $ subscribe (_ `addRef` n) stream
       liftEffect $ pushSink 3 sink
       liftEffect $ pushSink 2 sink
@@ -34,7 +33,7 @@ main = run [consoleReporter] do
         result <-
           liftEffect do
             n <- Ref.new 0
-            Tuple sink stream <- sinkStream'
+            { sink, stream } <- sinkStream'
             subscribe (_ `addRef` n) stream
             pushSink 3 sink
             pushSink 2 sink
@@ -44,7 +43,7 @@ main = run [consoleReporter] do
      -- describe "observe" $ do
      --   it "can observe sink" $ liftEffect do
      --     n <- Ref.new 0
-     --     Tuple sink stream <- mutableBehavior'
+     --     { sink, stream } <- mutableBehavior'
      --     observe (_ `addRef` n) (\_ -> pure unit) stream
      --     pushSink 3 sink
      --     pushSink 2 sink

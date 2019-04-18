@@ -95,7 +95,6 @@ import Prelude
 import Data.Either (Either)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2, runFn2, runFn3)
 import Data.Maybe (Maybe, isJust, fromJust)
-import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
 import Effect.Class (liftEffect)
@@ -125,16 +124,17 @@ unsafeFromJust m = (unsafePartial (fromJust m))
 filterJust :: forall a. Stream (Maybe a) -> Stream a
 filterJust = map unsafeFromJust <<< filter isJust
 
--- | Takes a predicate and a stream. A pair of streams is returned. The first
--- | stream includes all occurrences from the original stream for which the
--- | predicate is satisfied and the seconds stream all occurrences for which the
--- | predicate is false.
+-- | Takes a predicate and a stream. A record of to streams is returned. The
+-- | first stream includes all occurrences from the original stream which pass
+-- | the predicate test and the second stream includes all occurrences which
+-- | fail to pass the predicate.
 -- |
 -- | ```purescript
--- | Tuple smallNumbers largeNumbers = split (_ < 100) streamOfNumbers
+-- | { pass: smallNumbers, fail: largeNumbers } = split (_ < 100) streamOfNumbers
 -- | ```
-split :: forall a. (a -> Boolean) -> Stream a -> Tuple (Stream a) (Stream a)
-split predicate stream = unsafePartial (let [x, y] = runFn2 _split predicate stream in Tuple x y)
+split :: forall a. (a -> Boolean) -> Stream a -> { pass :: Stream a, fail :: Stream a }
+split predicate stream =
+  unsafePartial (let [pass, fail] = runFn2 _split predicate stream in { pass, fail })
 
 foreign import _split :: forall a. Fn2 (a -> Boolean) (Stream a) (Array (Stream a))
 
