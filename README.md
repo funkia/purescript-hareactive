@@ -14,7 +14,7 @@ Hareactive is a practical, powerful, and simple FRP library.
 * Simple precise semantics.
 * Supports circular dependencies i.e. recursively defined behaviors.
 * Easy integration with both `Effect` and `Aff` for side-effects.
-* Suitable for building UI.
+* Suitable for building UI (see also [purescript-turbine](https://github.com/funkia/purescript-turbine)).
 
 ## Background
 
