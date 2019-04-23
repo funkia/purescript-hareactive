@@ -1,12 +1,61 @@
 -- | This module contains functions for connecting FRP with the rest of the
--- | world. It contains low-level functions for creating and for consuming
--- | reactives.
+-- | world. It contains low-level functions for creating futures, streams, and
+-- | behaviors "from scratch". It also contains low-level functions consuming
+-- | streams and behaviors by executing side-effects in response to their
+-- | occurrences and value changes.
+-- |
+-- | The module contains the following functions for creating reactive.
+-- |
+-- | * `Future`: [sinkFuture](#v:sinkFuture)
+-- | * `Stream`: [sinkStream](#v:sinkStream), [producerStream](#v:producerStream)
+-- | * `Behavior`: [producerBehavior](#v:producerBehavior)
+-- |
+-- | Since the functions in this module are low-level some of them necessitates
+-- | the understanding a few details about how Hareactive is implemented. These
+-- | are activation and deactivation of streams and behaviors and the difference
+-- | between pull and push behaviors.
+-- |
+-- | #### Activation and deactivation
+-- |
+-- | When a stream or behavior is created in Hareactive it is _inactive_ until
+-- | other circumstanses forces it to _activate_. For instance, if `s` is a
+-- | stream then `map f s` creates a new stream which is inactive. Since `f` is
+-- | pure and since no one depends on the occurrences of the mapped stream the
+-- | occurrences are actualy never computed.
+-- |
+-- | As soon as something with an observable effect depends on the stream (like
+-- | a stateful combinator such as `accum` or a function with side effects such
+-- | as `runStreamEffect`) the stream will be activated. This is purely an
+-- | optimization and it functions such that it does not leak into the rest of
+-- | the API (as opposed to some other reactive libraries with similar notions
+-- | that do escape into the API an affect every day users). However, when
+-- | constructing streams and behaviors from scratch it is beneficial for
+-- | performance reasons to understand activation/deactivation and create then
+-- | such that they can activate and deactivate.
+-- |
+-- | For instance, if creating a stream from DOM key press events then only when
+-- | the stream is activated should it add and event listener to the DOM and
+-- | when the stream is deactivated it should remove the event listener from the
+-- | DOM.
+-- |
+-- | Streams and behaviors that can activate and deactivate are created with the
+-- | functions [producerStream](v:producerStream) and
+-- | [producerBehavior](v:producerBehavior) respectively.
+-- |
+-- | ### Push and pull behaviors
+-- |
+-- | Behaviors in Hareactive can be in either a _push_ state or a _pull_
+-- | state. When a behavior is in the push state it will notify any listeners of
+-- | any changes in its value. On the other hand, when a behavior is in the pull
+-- | state any listeners must ask the behavior for changes whenever it is
+-- | releant for them to do so. This distinction only affects the function
+-- | [observe](v:observe) which must handle behaviors in both states.
+-- |
 
 module Hareactive.Interop
-  ( subscribe
+  ( Clock
   , ProducerFunction
   , producerStream
-  , Clock
   , SinkFuture
   , sinkFuture
   , sinkFuture'
@@ -18,6 +67,7 @@ module Hareactive.Interop
   , sinkStream'
   , sinkStreamToStream
   , pushSink
+  , subscribe
   , observe
   ) where
 
