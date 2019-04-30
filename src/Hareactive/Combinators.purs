@@ -71,7 +71,8 @@ module Hareactive.Combinators
   , shift
   , shiftFrom
   , time
-  , timeFrom
+  , measureTime
+  , measureTimeFrom
   , changes
   , toggle
   , toggleFrom
@@ -316,15 +317,19 @@ foreign import shiftFrom :: forall a. Stream (Stream a) -> Behavior (Stream a)
 -- | epoch.
 foreign import time :: Behavior Number
 
+-- | The now-computation results in a behavior that tracks the time passed since
+-- | its creation.
+foreign import measureTime :: Now (Behavior Number)
+
 -- | A behavior giving access to continous time. When sampled the outer
 -- | behavior returns a behavior whose value is the time since the outer
 -- | behavior was sampled.
 -- |
 -- | Semantically.
 -- | ```purescript
--- | timeFrom = \from, to -> to - from
+-- | measureTimeFrom = \from, to -> to - from
 -- | ```
-foreign import timeFrom :: Behavior (Behavior Number)
+foreign import measureTimeFrom :: Behavior (Behavior Number)
 
 -- | Takes a behavior and returns a stream that has an occurrence
 -- | whenever the behavior changes.

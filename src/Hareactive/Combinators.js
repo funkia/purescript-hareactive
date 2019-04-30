@@ -34,7 +34,9 @@ exports.shiftFrom = H.shiftFrom;
 
 exports.time = H.time;
 
-exports.timeFrom = H.timeFrom;
+exports.measureTime = H.measureTime;
+
+exports.measureTimeFrom = H.measureTimeFrom;
 
 exports._switchTo = H.switchTo;
 
