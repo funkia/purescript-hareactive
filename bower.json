@@ -18,7 +18,8 @@
     "purescript-partial": "^2.0.1",
     "purescript-effect": "^2.0.1",
     "purescript-aff": "^5.1.1",
-    "purescript-web-dom": "^2.0.0"
+    "purescript-web-dom": "^2.0.0",
+    "purescript-web-uievents": "^2.0.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^4.0.0",

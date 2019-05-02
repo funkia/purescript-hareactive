@@ -27,6 +27,6 @@
   },
   "homepage": "https://github.com/funkia/purescript-hareactive#readme",
   "dependencies": {
-    "@funkia/hareactive": "0.3.1"
+    "@funkia/hareactive": "^0.3.2"
   }
 }
