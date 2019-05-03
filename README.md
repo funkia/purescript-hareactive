@@ -16,6 +16,16 @@ Hareactive is a practical, powerful, and simple FRP library.
 * Easy integration with both `Effect` and `Aff` for side-effects.
 * Suitable for building UI (see also [purescript-turbine](https://github.com/funkia/purescript-turbine)).
 
+## Examples
+
+### Counter
+
+![single counter GIF](examples/counter/single-counter.gif)
+
+A simple example which show how to create a counter with FRP and demonstrates
+how to integrate Hareactive with the DOM. [Source
+code](/examples/counter/src/Main.purs).
+
 ## Background
 
 Hareactive is highly inspired by the papers [Push-Pull Functional Reactive
