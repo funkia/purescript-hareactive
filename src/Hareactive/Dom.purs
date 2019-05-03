@@ -1,6 +1,6 @@
 -- | This module contains functions for interacting with DOM.
 
-module Hareactive.Dom
+module Hareactive.DOM
   ( streamFromEvent
   , keyDown
   , keyUp
@@ -16,6 +16,13 @@ import Web.Event.Event (EventType(..), Event)
 import Web.Event.EventTarget (EventTarget)
 import Web.UIEvent.KeyboardEvent (KeyboardEvent)
 
+-- | Creates a stream from a DOM element and an event type. You can think of
+-- | this as the FRP equivalent of
+-- | [addEventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener).
+-- |
+-- | ```purescript
+-- | clickStream <- streamFromEvent (wrap "click") (toEventTarget buttonElement)
+-- | ```
 streamFromEvent :: EventType -> EventTarget -> Effect (Stream Event)
 streamFromEvent (EventType s) t = runEffectFn2 _streamFromEvent t s
 

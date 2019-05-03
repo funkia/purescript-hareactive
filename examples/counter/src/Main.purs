@@ -13,7 +13,7 @@ import Web.HTML.HTMLDocument (toNonElementParentNode)
 import Web.HTML.Window (document)
 import Hareactive.Types (Behavior, Stream, Now)
 import Hareactive.Combinators (accum, runNow)
-import Hareactive.Dom (streamFromEvent, render)
+import Hareactive.DOM (streamFromEvent, render)
 import Partial.Unsafe (unsafePartial)
 
 -- | Just a handy (unsafe) way to get an element by its id
