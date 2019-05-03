@@ -1,0 +1,15 @@
+{
+  "name": "purescript-turbine-counter",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "pulp browserify --to bundle.js"
+  },
+  "author": "Funkia",
+  "license": "MIT",
+  "dependencies": {
+    "@funkia/hareactive": "^0.3.2",
+    "pulp": "^12.4.2",
+    "purescript": "^0.12.5"
+  }
+}

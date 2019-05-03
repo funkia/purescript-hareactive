@@ -9,7 +9,7 @@ module Hareactive.Dom
   ) where
 
 import Effect (Effect)
-import Effect.Uncurried (EffectFn2, runEffectFn2)
+import Effect.Uncurried (EffectFn1, EffectFn2, mkEffectFn1, runEffectFn2)
 import Hareactive.Types (Behavior, Now, Stream)
 import Prelude (Unit)
 import Web.Event.Event (EventType(..), Event)
@@ -45,6 +45,6 @@ foreign import keyPressed :: String -> Now (Behavior Boolean)
 -- | The render function is called on each frame using `requestAnimationFrame`
 -- | if the behavior has changed.
 render :: forall a. (a -> Effect Unit) -> Behavior a -> Effect Unit
-render = runEffectFn2 _render
+render cb = runEffectFn2 _render (mkEffectFn1 cb)
 
-foreign import _render :: forall a. EffectFn2 (a -> Effect Unit) (Behavior a) Unit
+foreign import _render :: forall a. EffectFn2 (EffectFn1 a Unit) (Behavior a) Unit

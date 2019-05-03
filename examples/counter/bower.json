@@ -1,0 +1,26 @@
+{
+  "name": "purescript-hareactive",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/funkia/purescript-hareactive.git"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "output"
+  ],
+  "dependencies": {
+    "purescript-prelude": "^4.1.1",
+    "purescript-functions": "^4.0.0",
+    "purescript-maybe": "^4.0.1",
+    "purescript-partial": "^2.0.1",
+    "purescript-effect": "^2.0.1",
+    "purescript-web-dom": "^2.0.0",
+    "purescript-web-uievents": "^2.0.0"
+  },
+  "devDependencies": {
+    "purescript-psci-support": "^4.0.0"
+  }
+}
