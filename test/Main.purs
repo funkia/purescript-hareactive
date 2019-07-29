@@ -5,18 +5,19 @@ import Prelude
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Ref as Ref
+import Effect.Aff (launchAff_)
 import Hareactive.BehaviorRef as BRef
 import Hareactive.Interop (pushSink, sinkStream', subscribe)
 import Test.Spec (describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Test.Spec.Reporter.Console (consoleReporter)
-import Test.Spec.Runner (run)
+import Test.Spec.Runner (runSpec)
 
 addRef :: Int -> Ref.Ref Int -> Effect Unit
 addRef n ref = Ref.modify_ (n + _) ref
 
 main :: Effect Unit
-main = run [consoleReporter] do
+main = launchAff_ $ runSpec [consoleReporter] do
   describe "hareactive" do
     it "sink and subscribe works" do
       n <- liftEffect $ Ref.new 0
